@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agile Servicing Software (Ineos Grenadier) — Feature Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root{
+    /* Agile Off-Road INEOS Scanner palette */
+    --bg:#eceae4;            /* warm light desktop */
+    --panel:#f6f4ef;         /* app body */
+    --card:#ffffff;
+    --ink:#2c2e31; --muted:#85888d;
+    --line:#e3e0d8; --line2:#ece9e2;
+    --coral:#d9532e;         /* AO primary red-orange */
+    --coral-dk:#bf4525;
+    --green:#2f7d52;         /* J2534 connected / health */
+    --blue:#2f6fb0;
+    --amber:#cf8a2a;
+    --red:#c0392b;
+    --purple:#7a4ea3;
+    --teal:#2f8f86;
+    --demo:#2f7d52; --off:#2f6fb0; --rumor:#cf8a2a; --no:#c0392b; --gap:#7a4ea3;
+    --console:#1c2024;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;font-size:15px;}
+  .wrap{max-width:1240px;margin:0 auto;background:var(--panel);min-height:100vh;
+    box-shadow:0 0 40px rgba(0,0,0,.08);}
+  .inner{padding:18px 26px 90px;}
+
+  /* ===== App bar (mimics scanner top bar) ===== */
+  .appbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:14px;
+    background:#fbfaf7;border-bottom:1px solid var(--line);
+    padding:10px 20px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .logo{width:38px;height:38px;flex:0 0 auto;}
+  .brand .bname{font-weight:800;font-size:13px;line-height:1.04;color:var(--coral);letter-spacing:.3px;}
+  .appname{font-size:15px;font-weight:600;color:#3a3c3f;padding-left:14px;border-left:1px solid var(--line);}
+  .statuses{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+    padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#55585c;white-space:nowrap;}
+  .chip.coral{background:#fdeee9;border-color:#f3cdbf;color:var(--coral-dk);}
+  .chip .led{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(47,125,82,.16);}
+  .chip.volt{font-variant-numeric:tabular-nums;color:#3a3c3f;}
+  .chip.lic{background:#eaf5ee;border-color:#bfe0cb;color:#246b41;}
+
+  /* ===== Breadcrumb + page title ===== */
+  .crumb{padding:12px 26px 0;font-size:13px;color:var(--coral);font-weight:600;}
+  .crumb span{color:#a9a59b;font-weight:500;}
+  .pagehead{padding:6px 26px 4px;}
+  .pagehead h1{margin:6px 0 2px;font-size:25px;font-weight:800;letter-spacing:.2px;color:#26292c;}
+  .pagehead .lead{margin:0;color:#6f7277;font-size:14px;}
+  .pagehead .lead a{color:var(--coral-dk);}
+  .meta{margin:8px 0 0;font-size:12.5px;color:#7a7d82;}
+  .meta strong{color:#3a3c3f;}
+
+  /* ===== Toolbar buttons (scanner pill style) ===== */
+  .toolbar{position:sticky;top:59px;z-index:55;display:flex;gap:10px;align-items:center;
+    flex-wrap:wrap;background:rgba(246,244,239,.94);backdrop-filter:blur(6px);
+    padding:12px 0;margin:14px 0 4px;border-bottom:1px solid var(--line);}
+  .btn{cursor:pointer;border:1px solid var(--coral);border-radius:9px;padding:9px 18px;font-size:13.5px;
+    font-weight:700;color:#fff;background:var(--coral);box-shadow:0 1px 3px rgba(217,83,46,.3);
+    display:inline-flex;align-items:center;gap:7px;}
+  .btn:hover{background:var(--coral-dk);border-color:var(--coral-dk);}
+  .btn.alt{background:#fff;color:var(--coral-dk);}
+  .btn.alt:hover{background:#fdeee9;}
+  .note{font-size:12.5px;color:var(--muted);}
+
+  /* ===== Stat cards ===== */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 8px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    border-left:5px solid var(--c,#999);}
+  .stat .n{font-size:26px;font-weight:800;color:var(--c,#333);}
+  .stat .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+
+  /* ===== Function-card style sections (colored left accent like the app) ===== */
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:18px 22px;margin:18px 0;box-shadow:0 1px 2px rgba(0,0,0,.04);
+    border-left:5px solid var(--c,var(--coral));}
+  section.demo{--c:var(--green);} section.off{--c:var(--blue);}
+  section.rumor{--c:var(--amber);} section.no{--c:var(--red);}
+  section.gap{--c:var(--purple);} section.facts{--c:var(--coral);} section.sources{--c:var(--teal);}
+  h2{font-size:18px;margin:0 0 4px;display:flex;align-items:center;gap:11px;color:#26292c;}
+  h2 .ic{width:30px;height:30px;border-radius:50%;flex:0 0 auto;display:inline-flex;align-items:center;
+    justify-content:center;font-size:15px;background:var(--cbg,#eee);color:var(--c,#333);font-weight:800;}
+  .demo .ic{--cbg:#e6f3ec;} .off .ic{--cbg:#e6f0f9;} .rumor .ic{--cbg:#fbf1df;}
+  .no .ic{--cbg:#fbe8e6;} .gap .ic{--cbg:#f1eaf8;} .facts .ic{--cbg:#fdeee9;} .sources .ic{--cbg:#e4f4f1;}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 14px;}
+
+  /* ===== Tables ===== */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line2);vertical-align:top;}
+  th{background:#f3f1ea;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#7c7f84;
+    border-bottom:1px solid var(--line);}
+  tbody tr:nth-child(even){background:#faf9f5;}
+  tbody tr:hover{background:#fdf4ef;}
+  td.feat{font-weight:700;width:23%;color:#2f3134;}
+  td.q{color:#54585d;font-style:italic;}
+  td.src a{color:var(--coral-dk);text-decoration:none;white-space:nowrap;font-weight:700;}
+  td.src a:hover{text-decoration:underline;}
+  .pill{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.4px;color:#fff;}
+  .p-demo{background:var(--green);} .p-off{background:var(--blue);}
+  .p-rumor{background:var(--amber);} .p-no{background:var(--red);} .p-gap{background:var(--purple);}
+  .date{white-space:nowrap;font-variant-numeric:tabular-nums;color:#5b5e63;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 0;font-size:13px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+
+  /* ===== Fact grid ===== */
+  .factgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
+  .fact{border:1px solid var(--line);border-left:4px solid var(--coral);border-radius:9px;padding:12px 14px;background:#fbfaf7;}
+  .fact b{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--coral-dk);margin-bottom:3px;}
+
+  /* ===== Sources ===== */
+  .src-list{font-size:12.5px;color:var(--muted);columns:2;column-gap:30px;}
+  .src-list a{color:var(--coral-dk);}
+
+  /* ===== Console log footer (mimics scanner log bar) ===== */
+  .console{background:var(--console);color:#cfd3d6;border-radius:10px;margin:22px 0 6px;
+    padding:12px 16px;font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.7;
+    box-shadow:inset 0 0 0 1px #2c3136;}
+  .console .ln{white-space:pre-wrap;}
+  .console .t{color:#6b7177;} .console .i{color:#5fb37e;} .console .w{color:#d6a24a;} .console .v{color:#7fb6e0;}
+  footer{color:var(--muted);font-size:12.5px;margin-top:14px;text-align:center;padding-bottom:8px;}
+
+  @media (max-width:760px){.src-list{columns:1;} td.feat{width:auto;} .appname{border:0;padding-left:0;}}
+  @media print{
+    body{background:#fff;font-size:11px;} .wrap{box-shadow:none;}
+    .toolbar,.appbar{position:static;}
+    .toolbar{display:none;}
+    section,.stat,.fact,.console{box-shadow:none;break-inside:avoid;}
+    a{color:#bf4525 !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== Scanner-style app bar ===== -->
+  <div class="appbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Agile Offroad">
+        <path d="M32 4 L58 56 H44 L32 28 L20 56 H6 Z" fill="#d9532e"/>
+        <path d="M32 30 L41 50 H23 Z" fill="#ffffff"/>
+      </svg>
+      <div class="bname">AGILE<br>OFFROAD</div>
+    </div>
+    <div class="appname">INEOS Scanner</div>
+    <div class="statuses">
+      <span class="chip coral">⏻ Disconnect</span>
+      <span class="chip"><span class="led"></span> J2534: Connected</span>
+      <span class="chip volt">12.6 V</span>
+      <span class="chip">KEY: ✓</span>
+      <span class="chip lic">✓ Licensed — Valid through 2027-05-11</span>
+    </div>
+  </div>
+
+  <!-- ===== Breadcrumb + page title ===== -->
+  <div class="crumb">Home <span>›</span> Feature Analysis</div>
+  <div class="pagehead">
+    <h1>INEOS Grenadier — Software Feature Analysis</h1>
+    <p class="lead">Agile Servicing Software (OBDII scanner &amp; coding tool) — compiled from all 17 pages of <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/" target="_blank">forum thread 12421872</a>. Developer: <strong>Agile Offroad</strong> (lead contact &ldquo;John&rdquo;; in-thread liaison &amp; beta tester &ldquo;Itsdchz&rdquo;).</p>
+    <p class="meta">Thread span: <strong>11 May 2026 → 8 June 2026</strong> · Report generated: <strong>8 June 2026</strong> · Build referenced in screenshots: <strong>INEOS Scanner v3.3.5-beta</strong></p>
+  </div>
+
+  <div class="inner">
+
+  <div class="toolbar">
+    <button class="btn" onclick="exportPDF()">⬇ Export to PDF</button>
+    <button class="btn alt" onclick="window.print()">🖨 Print</button>
+    <span class="note">PDF button renders the full report to a downloadable file. If it stalls on a slow connection, use Print → &ldquo;Save as PDF&rdquo;.</span>
+  </div>
+
+  <div class="legend">
+    <span><i class="p-demo"></i> <strong>Demonstrated</strong> — shown working (screenshots / &ldquo;I did it&rdquo;)</span>
+    <span><i class="p-off"></i> <strong>Officially stated</strong> — confirmed by Agile / liaison</span>
+    <span><i class="p-rumor"></i> <strong>Rumored / wishlist</strong> — user requests, &ldquo;maybe / in works&rdquo;</span>
+    <span><i class="p-no"></i> <strong>Confirmed not supported</strong></span>
+  </div>
+
+  <div class="cards">
+    <div class="stat" style="--c:var(--green)"><div class="n">19</div><div class="l">Demonstrated</div></div>
+    <div class="stat" style="--c:var(--blue)"><div class="n">24</div><div class="l">Officially stated</div></div>
+    <div class="stat" style="--c:var(--amber)"><div class="n">24</div><div class="l">Rumored / wishlist</div></div>
+    <div class="stat" style="--c:var(--red)"><div class="n">1</div><div class="l">Ruled out</div></div>
+    <div class="stat" style="--c:var(--purple)"><div class="n">25</div><div class="l">Competitive gaps</div></div>
+  </div>
+
+  <p class="note" style="margin:10px 2px 0;">⏱ <strong>On &ldquo;time&rdquo;:</strong> The forum (XenForo) publishes a <em>date</em> per post and a relative label for recent posts; an exact clock time is not exposed in page text (the &ldquo;Local time&rdquo; shown beside each member is that member&rsquo;s current clock, not the post timestamp). Dates below are as published; relative labels (&ldquo;Wed&rdquo;, &ldquo;Sat&rdquo;) are resolved to approximate calendar dates against the 8 Jun 2026 thread date. Page # and a direct post permalink are given for every row.</p>
+
+  <!-- ================= DEMONSTRATED ================= -->
+  <section class="demo">
+    <h2><span class="ic">✓</span>1 · Demonstrated Features <span class="pill p-demo">SHOWN WORKING</span></h2>
+    <p class="sub">Capabilities a beta tester (or the developer) posted as actually performed, generally with photos/screenshots or video.</p>
+    <table>
+      <thead><tr><th>Feature / capability</th><th>Date</th><th>Pg</th><th>Quote / evidence</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td class="feat">Service-reminder reset (fixed the &ldquo;Y2K&rdquo; service bug DIY)</td><td class="date">11 May 2026</td><td>1</td><td class="q">&ldquo;I reset my Y2K service bug issue BY MYSELF … WORKS GREAT FOR BETA!&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392558" target="_blank">#1</a></td></tr>
+        <tr><td class="feat">TPMS clone</td><td class="date">11 May 2026</td><td>1</td><td class="q">&ldquo;TPMS cloned&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392558" target="_blank">#1</a></td></tr>
+        <tr><td class="feat">Module scan — found 9 soft-code errors</td><td class="date">11 May 2026</td><td>1</td><td class="q">&ldquo;Scan and found 9 soft code errors&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392558" target="_blank">#1</a></td></tr>
+        <tr><td class="feat">DTC read &amp; reset — works offline</td><td class="date">12–13 May 2026</td><td>1–2</td><td class="q">&ldquo;DTC&rsquo;s are readable and resettable OFFLINE … Resetting DTC&rsquo;s off-line has been confirmed.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392574" target="_blank">#2</a></td></tr>
+        <tr><td class="feat">Head-Unit unlock — secret/engineering menus &amp; hidden off-road tiles</td><td class="date">15 May 2026</td><td>4</td><td class="q">&ldquo;Unlocking of the Head Unit (HU) has begun and has been successful. Secret menus…&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393053" target="_blank">#71</a></td></tr>
+        <tr><td class="feat">Airbag / SRS DTC reset</td><td class="date">16 May 2026</td><td>5</td><td class="q">&ldquo;Airbag DTCs can be reset with Agile&rsquo;s Scanner.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393129" target="_blank">#84</a></td></tr>
+        <tr><td class="feat">HU button-label text editing</td><td class="date">18 May 2026</td><td>5</td><td class="q">&ldquo;we already changed tyres to rims and attitude to sarcasm&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393455" target="_blank">#94</a></td></tr>
+        <tr><td class="feat">Independent live demo (John, at Overland Expo)</td><td class="date">19 May 2026</td><td>5</td><td class="q">&ldquo;Really good stuff. It is real and running for sure.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393504" target="_blank">#95</a></td></tr>
+        <tr><td class="feat">Walk-through demo videos (YouTube)</td><td class="date">13 &amp; 30 May 2026</td><td>2, 9</td><td class="q">&ldquo;A short … small walk through&rdquo; + later install/use demo (youtu.be/d9BLD_zHCko)</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394886" target="_blank">#164</a></td></tr>
+        <tr><td class="feat">&ldquo;God mode&rdquo; — full HU decryption, audio/visual parameter editing</td><td class="date">27 May 2026</td><td>6</td><td class="q">&ldquo;God mode has been enabled in Beta!&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394478" target="_blank">#114</a></td></tr>
+        <tr><td class="feat">Chime / bong / ding sound changes (incl. novelty voices) + splash-screen customization</td><td class="date">27 May 2026</td><td>6</td><td class="q">&ldquo;BONG DING BOINK changes … Austin Powers was found&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394478" target="_blank">#114</a></td></tr>
+        <tr><td class="feat">TPMS — set pressure thresholds, save presets, &ldquo;TPMS wake-up&rdquo; (Beta 3.5)</td><td class="date">~3 Jun 2026 (Wed)</td><td>13</td><td class="q">&ldquo;NOW we can set the pressure thresholds … and save presets. No more infinite warning message…&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395429" target="_blank">#255</a></td></tr>
+        <tr><td class="feat">Expert Coding — save / read / write / revert ECU config versions (Beta 3.5)</td><td class="date">~3 Jun 2026 (Wed)</td><td>13</td><td class="q">&ldquo;Save your current, read and write a new version, revert to a saved version.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395429" target="_blank">#255</a></td></tr>
+        <tr><td class="feat">Service Reset — preset interval by date <em>or</em> mileage (Beta 3.5)</td><td class="date">~3 Jun 2026 (Wed)</td><td>13</td><td class="q">&ldquo;Preset interval upon reset. Customize and change Date or mileage intervals.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395429" target="_blank">#255</a></td></tr>
+        <tr><td class="feat">DTC cross-reference to exact Ineos module/ECU (non-generic DB) (Beta 3.5)</td><td class="date">~3 Jun 2026 (Wed)</td><td>13</td><td class="q">&ldquo;Read and cross reference the database of NON GENERIC OBD codes … directly correlate to WHERE it is within the INEOS system.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395429" target="_blank">#255</a></td></tr>
+        <tr><td class="feat">Scan all modules — quick (15–20 s) &amp; deep-dive (10–15 min); txt &amp; PDF report export (Beta 3.5)</td><td class="date">~3 Jun 2026 (Wed)</td><td>13</td><td class="q">&ldquo;Scan all modules … Create txt and PDF files to send to service provider.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395429" target="_blank">#255</a></td></tr>
+        <tr><td class="feat">Expert Coding for TPMS — disable warnings, presets (Factory/Offroad/Mid/Aggressive), debounce &amp; calibration table (Beta 3.5)</td><td class="date">~3 Jun 2026 (Wed)</td><td>13</td><td class="q">&ldquo;Disable all TPMS warnings … Set parameters to presets … Customize inflation warnings …&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395436" target="_blank">#257</a></td></tr>
+        <tr><td class="feat">New &ldquo;HUGE module&rdquo; — toggle features on/off + customize presets, sound, visuals, warnings, menus (screenshots)</td><td class="date">~6 Jun 2026 (Sat)</td><td>16</td><td class="q">&ldquo;Another HUGE module has been added … toggle on/off capabilities and customization of presets, sound, visuals, warnings, menus…&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395728" target="_blank">#313</a></td></tr>
+        <tr><td class="feat">TPMS — manually write / program any compatible sensor ID into the module</td><td class="date">~7 Jun 2026 (Sun)</td><td>17</td><td class="q">&ldquo;You can manually punch in the ID number and write it to the vehicle … it will accept it.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395800" target="_blank">#321</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= OFFICIAL ================= -->
+  <section class="off">
+    <h2><span class="ic">★</span>2 · Officially Stated Features <span class="pill p-off">CONFIRMED BY AGILE</span></h2>
+    <p class="sub">Capabilities stated as confirmed or committed by Agile Offroad (directly, or relayed by the in-thread liaison &ldquo;Itsdchz&rdquo; from &ldquo;John&rdquo; / the developer).</p>
+    <table>
+      <thead><tr><th>Feature / capability</th><th>Date</th><th>Pg</th><th>Quote / detail</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td class="feat">Service-reminder reset + lengthen/shorten interval (time &amp; mileage)</td><td class="date">12 May 2026</td><td>1</td><td class="q">&ldquo;Service Reminder reset. Ability to lengthen service reminder, or shorten…&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392576" target="_blank">#4</a></td></tr>
+        <tr><td class="feat">Health Scan + Deep-Dive Scan</td><td class="date">12 May 2026</td><td>1</td><td class="q">&ldquo;Health Scan … Deep Dive Scan for intense look at the data your Ineos stores.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392576" target="_blank">#4</a></td></tr>
+        <tr><td class="feat">TPMS — clone, copy, move, learn</td><td class="date">12 May 2026</td><td>1</td><td class="q">&ldquo;TPMS – clone, copy, move, learn&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392576" target="_blank">#4</a></td></tr>
+        <tr><td class="feat">Pro/dealer module value changes (customize characteristics)</td><td class="date">12 May 2026</td><td>1</td><td class="q">&ldquo;Ability to change values of certain modules that may enhance, or change characteristics…&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392576" target="_blank">#4</a></td></tr>
+        <tr><td class="feat">Backup / restore module settings (write back later)</td><td class="date">12 May 2026</td><td>1</td><td class="q">&ldquo;Ability to backup stored data, settings of modules to write back at a later time…&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392576" target="_blank">#4</a></td></tr>
+        <tr><td class="feat">Service-interval reset &amp; TPMS relearn — confirmed done ✅</td><td class="date">13 May 2026</td><td>3</td><td class="q">Service interval reset ✅ and TPMS relearn ✅ marked complete</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392755" target="_blank">#42</a></td></tr>
+        <tr><td class="feat">Offline mode — DTC read/reset offline; security-key functions (TPMS/coding/service) need server</td><td class="date">12 May–6 Jun 2026</td><td>2,12,16</td><td class="q">&ldquo;DTC READ AND RESET … are NOT required to have internet connection.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395727" target="_blank">#312</a></td></tr>
+        <tr><td class="feat">OTA software download + auto-updates on server ping</td><td class="date">27 May 2026</td><td>7</td><td class="q">&ldquo;OTA download of Agile Ineos Scanner Tool software, and OTA updates when … pinging server.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394568" target="_blank">#128</a></td></tr>
+        <tr><td class="feat">Deciphered, cross-referenced DTC database (not generic OBD)</td><td class="date">1 Jun 2026</td><td>10</td><td class="q">&ldquo;a deciphered + cross-referenced DTC code database … not available by any other code reader.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395139" target="_blank">#193</a></td></tr>
+        <tr><td class="feat">Multiple ECUs unlocked (head unit, lighting, sound) + parameter customization</td><td class="date">1 Jun 2026</td><td>10</td><td class="q">&ldquo;multiple ECUs unlocked … parameter changes / user customization of light + sound/audio settings…&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395139" target="_blank">#193</a></td></tr>
+        <tr><td class="feat">Customization of lighting, sound, lane-departure &amp; ADAS &ldquo;already in progress&rdquo;</td><td class="date">2 Jun 2026</td><td>12</td><td class="q">&ldquo;User customization already in progress of head unit, lighting, sound, lane departure, and ADAS.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395272" target="_blank">#223</a></td></tr>
+        <tr><td class="feat">ADAS disable on MY2026 (no idiot lights) — in active development</td><td class="date">~4 Jun 2026</td><td>14</td><td class="q">&ldquo;This will be done. Developer is working on Agile&rsquo;s 2026, literally RIGHT now.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395557" target="_blank">#271</a></td></tr>
+        <tr><td class="feat">Permanent silence of lane-departure chime (no dash light) — &ldquo;in the works&rdquo;</td><td class="date">~4 Jun 2026</td><td>14</td><td class="q">&ldquo;This is already in the works!&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395524" target="_blank">#264</a></td></tr>
+        <tr><td class="feat">Start/Stop &amp; auto on/off persistence between cycles — on roadmap</td><td class="date">~4 Jun 2026</td><td>14</td><td class="q">&ldquo;That is on the list for sure. At the least, the on all the time for auto on/off.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395573" target="_blank">#275</a></td></tr>
+        <tr><td class="feat">Diesel B57 support — beta testers onboarded (AU &amp; UK)</td><td class="date">1–5 Jun 2026</td><td>10,14,15</td><td class="q">&ldquo;2 beta testers are on board right now&rdquo; · &ldquo;Each EURO version is a different emission standard… branches to specific market.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395558" target="_blank">#272</a></td></tr>
+        <tr><td class="feat">Remote-login support + send txt/PDF readings to service provider</td><td class="date">2 Jun 2026</td><td>13</td><td class="q">&ldquo;Internet needed for support, updates, remote-login help, or to send the txt/PDF of readings.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395305" target="_blank">#242</a></td></tr>
+        <tr><td class="feat">Licensing: VIN-locked, transferable to a different VIN; ~$499 incl. dongle; 2 yrs free updates</td><td class="date">1–2 Jun 2026</td><td>10,12</td><td class="q">&ldquo;$499 includes the USB dongle ECU reader … license transferable to a different VIN.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395272" target="_blank">#223</a></td></tr>
+        <tr><td class="feat">Multi-Grenadier &ldquo;family plan&rdquo; (~+$100/vehicle, capped) + Pro/dealer tier planned</td><td class="date">2 Jun 2026</td><td>12</td><td class="q">&ldquo;Pro version and others are part of the model.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395300" target="_blank">#240</a></td></tr>
+        <tr><td class="feat">Bi-directional / actuation control — &ldquo;possible,&rdquo; roadmap after module customization ships</td><td class="date">~5 Jun 2026</td><td>15</td><td class="q">&ldquo;Thoughts for bi directional are possible, especially associated with the B57 testing … roadmap is to get everything out … then how to interact with the values, will follow.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395601" target="_blank">#281</a></td></tr>
+        <tr><td class="feat">Hardware: bundle = dongle + USB cable + media; 200 units in stock; one PC by UUID</td><td class="date">~6 Jun 2026 (Sat)</td><td>16</td><td class="q">&ldquo;There are currently 200 dongles … registers to you one PC device using UUID. Then log your VIN.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395695" target="_blank">#306</a></td></tr>
+        <tr><td class="feat">Platform: Windows-only at launch; native multi-platform a future aspiration</td><td class="date">13 May / 1 Jun 2026</td><td>2,10</td><td class="q">&ldquo;mass platform capability is something we can look at, after hitting market and stabilization.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395132" target="_blank">#191</a></td></tr>
+        <tr><td class="feat">Positioning: &ldquo;more functionality than Globe Guard at half the price&rdquo;</td><td class="date">1 Jun 2026</td><td>9</td><td class="q">&ldquo;Agile will have more functionality than Globe Guard at half the price … the beta can already do more.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395069" target="_blank">#180</a></td></tr>
+        <tr><td class="feat">Anticipated launch date — <strong>17 July 2026</strong></td><td class="date">~5 Jun 2026</td><td>15</td><td class="q">&ldquo;Just about there. July 17th is anticipated launch!&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395655" target="_blank">#287</a></td></tr>
+        <tr><td class="feat">ECU-bricking risk acknowledged; safe presets vs. &ldquo;God mode&rdquo; expert writes</td><td class="date">2 Jun 2026</td><td>12,16</td><td class="q">&ldquo;only certain modules and writes to them can cause probabilities of bricking … far less risky, in MOST cases.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395272" target="_blank">#223</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= RUMORED ================= -->
+  <section class="rumor">
+    <h2><span class="ic">?</span>3 · Rumored / Wishlist Features <span class="pill p-rumor">REQUESTED — NOT CONFIRMED</span></h2>
+    <p class="sub">User-requested or speculative (&ldquo;would be nice&rdquo;, &ldquo;maybe&rdquo;, &ldquo;being probed&rdquo;) — not committed by Agile at time of writing.</p>
+    <table>
+      <thead><tr><th>Requested feature</th><th>Date</th><th>Pg</th><th>Requested by / note</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td class="feat">ADAS module disable + suppress telltale lights (early request)</td><td class="date">13 May 2026</td><td>2</td><td class="q">IslandFalconer (cites BimmerCode) — later moved to &ldquo;official/in-dev&rdquo; for MY26</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392738" target="_blank">#38</a></td></tr>
+        <tr><td class="feat">Auto Start/Stop software disable</td><td class="date">13 May 2026</td><td>2</td><td class="q">Hansel — &ldquo;A software solution to the Auto stop start would also be incredible.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392720" target="_blank">#37</a></td></tr>
+        <tr><td class="feat">Use aux lights without engaging off-road mode</td><td class="date">13 May 2026</td><td>2</td><td class="q">IslandFalconer (recurring wishlist item)</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392738" target="_blank">#38</a></td></tr>
+        <tr><td class="feat">Engage rear diff lock in High range</td><td class="date">13 May 2026</td><td>2</td><td class="q">IslandFalconer</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392738" target="_blank">#38</a></td></tr>
+        <tr><td class="feat">MPH ↔ KPH / distance-unit toggle (e.g. re-enable km on US spec)</td><td class="date">15 May 2026</td><td>4</td><td class="q">Zenadier / IslandFalconer — &ldquo;re-enable kilometers on my US spec.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392906" target="_blank">#64</a></td></tr>
+        <tr><td class="feat">Enable wired Android Auto</td><td class="date">15 May 2026</td><td>4</td><td class="q">derek_zoolander</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393057" target="_blank">#72</a></td></tr>
+        <tr><td class="feat">Enter/exit coolant-purge &amp; other service modes</td><td class="date">14 May 2026</td><td>4</td><td class="q">ryanjl</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333392961" target="_blank">#69</a></td></tr>
+        <tr><td class="feat">Bi-directional fuel/emissions diagnostics (HP fuel, injectors, fuel pump, MAF/MAP, NOx, DPF, AdBlue)</td><td class="date">16 May 2026</td><td>5</td><td class="q">bakepl — mission-critical diesel/petrol systems</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393092" target="_blank">#81</a></td></tr>
+        <tr><td class="feat">Remove NATO-plug winch speed lockout (BCM)</td><td class="date">16 May 2026</td><td>5</td><td class="q">LabRat / holto / 5teve</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393141" target="_blank">#85</a></td></tr>
+        <tr><td class="feat">Use winch while in Park</td><td class="date">16 May / 3 Jun 2026</td><td>5,13</td><td class="q">HeavyFoot — &ldquo;the only thing I&rsquo;d desire that I&rsquo;ve not read yet.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395439" target="_blank">#258</a></td></tr>
+        <tr><td class="feat">Finer stereo volume steps / raise max volume</td><td class="date">19 May 2026</td><td>5,9</td><td class="q">Krabby / MurphyMurph — low-volume steps too large</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395041" target="_blank">#172</a></td></tr>
+        <tr><td class="feat">Climate temp calibration / adjustable auto-climate low setpoint</td><td class="date">19 May 2026</td><td>5</td><td class="q">FlyersFan76 / DaneJa</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333393607" target="_blank">#99</a></td></tr>
+        <tr><td class="feat">Persist off-road mode + axle-locker status across engine restart</td><td class="date">22 May / 31 May 2026</td><td>6,9</td><td class="q">Deepblue / MurphyMurph</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394030" target="_blank">#106</a></td></tr>
+        <tr><td class="feat">Fuel-gauge / miles-to-empty calibration offset</td><td class="date">24 May 2026</td><td>6</td><td class="q">derek_zoolander</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394186" target="_blank">#110</a></td></tr>
+        <tr><td class="feat">Re-enable petrol engine oil-temperature display</td><td class="date">25 May 2026</td><td>6</td><td class="q">audibabba — &ldquo;It is still used in the diesel.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394284" target="_blank">#113</a></td></tr>
+        <tr><td class="feat">Disable / defeat AdBlue (SCR)</td><td class="date">27 May 2026</td><td>6</td><td class="q">joejet — &ldquo;Can you see anything about adblue? Like disabling it?&rdquo; (unanswered)</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394481" target="_blank">#116</a></td></tr>
+        <tr><td class="feat">Disable wiper &ldquo;last wipe&rdquo; behaviour</td><td class="date">27 May 2026</td><td>6</td><td class="q">Stealthn</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394496" target="_blank">#120</a></td></tr>
+        <tr><td class="feat">Native iOS / iPad app</td><td class="date">28 May 2026</td><td>7</td><td class="q">DaneJa — &ldquo;iOS compatibility would be much more useful than MacOS.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394632" target="_blank">#138</a></td></tr>
+        <tr><td class="feat">Disable ALL bongs/chimes globally</td><td class="date">28 May 2026</td><td>7</td><td class="q">Ron50 — &ldquo;I&rsquo;d love a feature to disable all bongs.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333394677" target="_blank">#139</a></td></tr>
+        <tr><td class="feat">Disable torque-converter disconnect at stop (esp. off-road mode)</td><td class="date">~5 Jun 2026</td><td>15</td><td class="q">nuclearbeef — &ldquo;I know it is possible, because it is disabled when trailer lights are plugged in.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395668" target="_blank">#292</a></td></tr>
+        <tr><td class="feat">Disable &ldquo;take a break&rdquo; driver-attention warning</td><td class="date">~4 Jun 2026</td><td>14</td><td class="q">skinny_tom</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395543" target="_blank">#265</a></td></tr>
+        <tr><td class="feat">Software-license-only option (no dongle, lower price)</td><td class="date">2 Jun 2026</td><td>13</td><td class="q">derek_zoolander — asks for ~$400–430 SW-only tier</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395399" target="_blank">#247</a></td></tr>
+        <tr><td class="feat">Explicit Standard / Advanced / Pro tier structure</td><td class="date">2 Jun 2026</td><td>12</td><td class="q">C-Mack — proposes VIN-locked → multi-VIN → fully-unlocked shop tier</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395297" target="_blank">#238</a></td></tr>
+        <tr><td class="feat">Reset dash warning lights after battery disconnect</td><td class="date">~5 Jun 2026</td><td>15</td><td class="q">squegles</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395655" target="_blank">#286</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= NOT SUPPORTED ================= -->
+  <section class="no">
+    <h2><span class="ic">⚠</span>4 · Confirmed Not Supported <span class="pill p-no">RULED OUT</span></h2>
+    <table>
+      <thead><tr><th>Feature</th><th>Date</th><th>Pg</th><th>Reason given</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td class="feat">ADAS camera/radar recalibration (e.g. after windshield replacement)</td><td class="date">30 May 2026</td><td>9</td><td class="q">&ldquo;A no … resetting or adjust the camera requires that big wall of targets and lines required to calibrate.&rdquo;</td><td class="src"><a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333395025" target="_blank">#171</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= KEY FACTS ================= -->
+  <section class="facts">
+    <h2><span class="ic">i</span>Key Product Facts at a Glance</h2>
+    <div class="factgrid">
+      <div class="fact"><b>Developer</b>Agile Offroad (Ineos-specific). Internal software — not a re-badged 3rd-party engine.</div>
+      <div class="fact"><b>Price (target)</b>~$499 USD incl. USB dongle/OBDII reader + 2 yrs free updates. Renewal after 2 yrs explicitly <em>not</em> another $499 (TBD, minimal). Family plan ~+$100/extra Grenadier. Pro/dealer tier planned.</div>
+      <div class="fact"><b>Anticipated launch</b>17 July 2026 (still in beta — Beta 3.5 as of early June).</div>
+      <div class="fact"><b>Platform</b>Windows 10/11 only at launch, registered to one PC by UUID. Mac only via VM/UTM workarounds. Multi-platform = future aspiration.</div>
+      <div class="fact"><b>Hardware</b>Wired USB-to-OBD dongle (Tactrix OpenPort 2.0 / clone type) supplied in bundle; ~200 units in initial stock.</div>
+      <div class="fact"><b>Connectivity</b>Internet for license auth, OTA updates, security-key calc, remote support &amp; report send. DTC read/reset + basic functions work offline.</div>
+      <div class="fact"><b>Licensing</b>VIN-locked, transferable to a new VIN. Software keeps running after 2-yr window (only updates/support lapse).</div>
+      <div class="fact"><b>Engine coverage</b>Petrol (BMW B58) working in beta; Diesel (B57) testers just onboarded (AU &amp; UK), branching by Euro emissions market.</div>
+      <div class="fact"><b>Named competitor</b>GlobeGuard (Switzerland) OBD2 service tool ≈ $1,036; Agile aims to undercut it at ~half price with more function. Users also benchmark Ross-Tech VCDS, BimmerCode, Autel.</div>
+    </div>
+  </section>
+
+  <!-- ================= COMPETITIVE GAPS ================= -->
+  <section class="gap">
+    <h2><span class="ic">⊘</span>5 · Missing / Weaker vs. Third-Party Tools for Competitive Vehicles <span class="pill p-gap">GAP ANALYSIS</span></h2>
+    <p class="sub">The Grenadier shares BMW B58 petrol / B57 diesel engines and the ZF8 transmission, so the natural competitive set is BMW/VAG-oriented 3rd-party tools — Autel MaxiSys, Ross-Tech VCDS, OBDeleven, Carly, ABRITES, GAP Diagnostic, BimmerCode, plus tuning tools (bootmod3, MHD, xHP). Items below are features those tools commonly offer that the Agile tool currently lacks, only has on its roadmap, or does in a more limited way.</p>
+    <table>
+      <thead><tr><th>Missing / weaker capability</th><th>Agile status</th><th>Who offers it (examples)</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td class="feat">Bi-directional active / output tests (actuate fans, pumps, injectors, solenoids, windows, relays)</td><td>Roadmap only (&ldquo;possible&rdquo;)</td><td>Autel MaxiSys (3000+ tests), OBDeleven, Carly</td><td>Lets you command components to verify the part vs. the circuit — core diagnostics, not just code clearing.</td></tr>
+        <tr><td class="feat">Live data streaming, PID graphing &amp; data logging/recording</td><td>Not mentioned (scans only)</td><td>VCDS, Autel, OBDeleven, Carly</td><td>Real-time sensor values and logs are essential for chasing intermittent faults and tuning.</td></tr>
+        <tr><td class="feat">Freeze-frame data capture</td><td>Not mentioned</td><td>Autel, VCDS, generic OBDII</td><td>Snapshot of conditions when a fault set — standard diagnostic context.</td></tr>
+        <tr><td class="feat">OBDII readiness/emissions monitors, smog-check status, Mode 6 test results</td><td>Not mentioned</td><td>Most generic + pro scanners</td><td>Needed to confirm a vehicle will pass inspection after repairs/clears.</td></tr>
+        <tr><td class="feat">ECU flashing / firmware reprogramming (J2534)</td><td>Coding only, no flashing</td><td>Autel Elite/Ultra, OEM J2534</td><td>Recover/update module firmware; Agile changes parameters but does not reflash.</td></tr>
+        <tr><td class="feat">Performance / power tuning (B58 stage maps)</td><td>&ldquo;Drag race mode&rdquo; coding only</td><td>bootmod3, MHD, JB4</td><td>Real power/torque gains — Agile toggles a mode but does not remap fuel/boost.</td></tr>
+        <tr><td class="feat">Transmission (ZF8) tuning / adaptation reset &amp; relearn</td><td>Not mentioned</td><td>xHP Flashtool, Autel</td><td>Shift-firmness, adaptation resets after service — popular on ZF8 platforms.</td></tr>
+        <tr><td class="feat">Key programming / immobilizer / add-key</td><td>Not mentioned</td><td>Autel IM-series, ABRITES</td><td>Add/replace keys, anti-theft service — common indie-shop need.</td></tr>
+        <tr><td class="feat">ADAS camera/radar calibration</td><td>Explicitly NOT supported</td><td>Autel (with target frames)</td><td>Required after windshield/camera work; Agile needs a dealer/calibration rig.</td></tr>
+        <tr><td class="feat">Battery registration / coding after battery replacement</td><td>Not mentioned</td><td>Carly, OBDeleven, Autel</td><td>BMW-platform vehicles need the new battery registered for correct charging.</td></tr>
+        <tr><td class="feat">Electronic parking-brake (EPB) service &amp; brake bleeding</td><td>Not mentioned</td><td>Autel, VCDS</td><td>Retract EPB for pad changes; ABS-pump bleed routines.</td></tr>
+        <tr><td class="feat">Steering-angle (SAS) calibration</td><td>Not mentioned</td><td>Autel, VCDS</td><td>Required after alignment / suspension / steering work.</td></tr>
+        <tr><td class="feat">DPF forced regeneration, AdBlue/SCR &amp; EGR service routines</td><td>Diesel only just entering beta</td><td>Autel, OBDeleven</td><td>Diesel B57 owners need active regen and emissions resets.</td></tr>
+        <tr><td class="feat">Injector coding / fuel-trim adaptation</td><td>Not mentioned</td><td>Autel, OEM tools</td><td>Code new injectors / reset adaptations after fuel-system work.</td></tr>
+        <tr><td class="feat">Native mobile app (iOS/Android) with wireless Bluetooth dongle</td><td>Windows + wired only</td><td>OBDeleven, Carly, BimmerCode</td><td>Phone-based coding is the dominant consumer model — no laptop required.</td></tr>
+        <tr><td class="feat">Cross-platform native client (macOS / Linux)</td><td>Windows-only (VM workaround)</td><td>App-based competitors; VCDS (Win)</td><td>Large share of Grenadier owners are Mac/iPad users (per thread).</td></tr>
+        <tr><td class="feat">Fully offline coding (no server security-key calc)</td><td>Needs server for key calc</td><td>VCDS, OBDeleven (largely offline)</td><td>Coding in the field / no-signal areas — relevant for an overland vehicle.</td></tr>
+        <tr><td class="feat">Cloud vehicle profile / digital garage / maintenance history</td><td>Local save/restore only</td><td>Carly Digital Garage</td><td>Cross-device config backup &amp; service-history tracking.</td></tr>
+        <tr><td class="feat">Used-car / mileage-tamper &amp; health check report</td><td>Not offered</td><td>Carly</td><td>Pre-purchase inspection &amp; odometer-fraud detection.</td></tr>
+        <tr><td class="feat">Built-in performance measurement (0–60, dyno, drag timer)</td><td>Not offered (coding mode only)</td><td>OBDeleven One-Click apps, Carly</td><td>Owner-fun + before/after benchmarking.</td></tr>
+        <tr><td class="feat">Multi-brand / multi-make support</td><td>Ineos-only (by design)</td><td>Autel, OBDeleven (VAG), Carly (BMW+)</td><td>One tool for a mixed garage — Agile&rsquo;s depth trades off breadth.</td></tr>
+        <tr><td class="feat">Low-cost multi-VIN (club/shop) licensing</td><td>VIN-locked; Pro tier TBD</td><td>VCDS (3-VIN), Autel (unlimited)</td><td>Clubs &amp; indie shops service many vehicles on one license.</td></tr>
+        <tr><td class="feat">Wireless VCI, DoIP &amp; CAN-FD high-speed protocol support</td><td>Wired USB dongle</td><td>Autel (wireless VCI, DoIP/CAN-FD)</td><td>Faster, untethered comms &amp; newer-protocol future-proofing.</td></tr>
+        <tr><td class="feat">Guided fault-finding, repair info &amp; wiring diagrams</td><td>Not offered</td><td>Autel, Identifix-style platforms</td><td>Step-by-step repair guidance beyond code lookup.</td></tr>
+        <tr><td class="feat">Free / freemium entry tier</td><td>One-time ~$499 bundle</td><td>OBDeleven (free credits), Carista (free tier)</td><td>Lower barrier to try basic functions before committing.</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:12px;">Caveat: Agile is a brand-dedicated tool still in beta and improving weekly, so several gaps above (bi-directional control, diesel/DPF service, more platforms) are explicitly on its stated roadmap. Conversely, its Ineos-specific reverse engineering — a deciphered non-generic DTC database mapped to exact modules, deep head-unit unlock, and granular TPMS threshold/preset control — exceeds what generic multi-brand tools typically offer for the Grenadier.</p>
+  </section>
+
+  <!-- ================= SOURCES ================= -->
+  <section class="sources">
+    <h2><span class="ic">⛓</span>Sources</h2>
+    <p class="sub">Primary — all 17 pages of the forum thread (each linked); competitive capabilities verified via vendor/review sources.</p>
+    <div class="src-list">
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/" target="_blank">Thread p.1</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-2" target="_blank">p.2</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-3" target="_blank">p.3</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-4" target="_blank">p.4</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-5" target="_blank">p.5</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-6" target="_blank">p.6</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-7" target="_blank">p.7</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-8" target="_blank">p.8</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-9" target="_blank">p.9</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-10" target="_blank">p.10</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-11" target="_blank">p.11</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-12" target="_blank">p.12</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-13" target="_blank">p.13</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-14" target="_blank">p.14</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-15" target="_blank">p.15</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-16" target="_blank">p.16</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-17" target="_blank">p.17</a> ·
+      <a href="https://iamcarhacker.com/obdeleven-vs-carly-vs-carista/" target="_blank">OBDeleven vs Carly vs Carista (iamcarhacker)</a> ·
+      <a href="https://obdeleven.com/features/adaptation" target="_blank">OBDeleven — Adaptations</a> ·
+      <a href="https://www.autel.com/mk3/3722.jhtml" target="_blank">Autel MaxiSys MS906 Pro</a> ·
+      <a href="https://store.autel.com/products/maxisys-elite-ii-pro" target="_blank">Autel MaxiSys Elite II Pro (active tests / ECU programming / ADAS)</a>
+    </div>
+  </section>
+
+  <!-- ================= CONSOLE LOG (scanner-style) ================= -->
+  <div class="console" aria-hidden="true">
+    <div class="ln"><span class="t">[18:17:00.229]</span> <span class="i">[INFO]</span> Action database: 4638 DTCs loaded (v2 rewritten)</div>
+    <div class="ln"><span class="t">[18:17:00.504]</span> <span class="i">[INFO]</span> Cloud server: Connected (auth enabled)</div>
+    <div class="ln"><span class="t">[18:17:01.118]</span> <span class="i">[INFO]</span> Source ingest: 17 forum pages parsed — thread 12421872</div>
+    <div class="ln"><span class="t">[18:17:01.640]</span> <span class="i">[INFO]</span> Feature index built — <span class="v">demonstrated=19</span> <span class="v">official=24</span> <span class="v">rumored=24</span> <span class="v">ruled_out=1</span></div>
+    <div class="ln"><span class="t">[18:17:02.003]</span> <span class="w">[WARN]</span> Competitive gap scan: 25 capabilities absent / roadmap-only vs. 3rd-party tools</div>
+    <div class="ln"><span class="t">[18:17:02.219]</span> <span class="i">[INFO]</span> Report ready — export to PDF available</div>
+  </div>
+
+  <footer>
+    Compiled 8 June 2026 from the public forum thread. Categorizations (Demonstrated / Official / Rumored) reflect how each item was characterized in-thread at time of reading; beta software, subject to change. &ldquo;Itsdchz&rdquo; acts as the in-thread Agile liaison relaying developer/&ldquo;John&rdquo; statements. Styling is a tribute to the Agile Off-Road INEOS Scanner UI; this report is an independent community summary, not an Agile Offroad product.
+  </footer>
+
+  </div><!-- /.inner -->
+</div>
+
+<script>
+function exportPDF(){
+  var btns = document.querySelector('.toolbar');
+  if(btns) btns.style.display='none';
+  var el = document.querySelector('.wrap');
+  var opt = {
+    margin:[8,8,8,8],
+    filename:'Agile_Ineos_Scanner_Feature_Analysis.pdf',
+    image:{type:'jpeg',quality:0.97},
+    html2canvas:{scale:2,useCORS:true,scrollY:0},
+    jsPDF:{unit:'mm',format:'a3',orientation:'landscape'},
+    pagebreak:{mode:['css','legacy'],avoid:['tr','section','.fact','.stat']}
+  };
+  if(typeof html2pdf==='undefined'){
+    if(btns) btns.style.display='';
+    window.print();
+    return;
+  }
+  html2pdf().set(opt).from(el).save().then(function(){
+    if(btns) btns.style.display='';
+  }).catch(function(){
+    if(btns) btns.style.display='';
+    window.print();
+  });
+}
+</script>
+</body>
+</html>

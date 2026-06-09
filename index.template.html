@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Agile Servicing Software (Ineos Grenadier) — Feature Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root{
+    /* Agile Off-Road INEOS Scanner palette */
+    --bg:#eceae4;            /* warm light desktop */
+    --panel:#f6f4ef;         /* app body */
+    --card:#ffffff;
+    --ink:#2c2e31; --muted:#85888d;
+    --line:#e3e0d8; --line2:#ece9e2;
+    --coral:#d9532e;         /* AO primary red-orange */
+    --coral-dk:#bf4525;
+    --green:#2f7d52;         /* J2534 connected / health */
+    --blue:#2f6fb0;
+    --amber:#cf8a2a;
+    --red:#c0392b;
+    --purple:#7a4ea3;
+    --teal:#2f8f86;
+    --demo:#2f7d52; --off:#2f6fb0; --rumor:#cf8a2a; --no:#c0392b; --gap:#7a4ea3;
+    --console:#1c2024;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;font-size:15px;}
+  .wrap{max-width:1240px;margin:0 auto;background:var(--panel);min-height:100vh;
+    box-shadow:0 0 40px rgba(0,0,0,.08);}
+  .inner{padding:18px 26px 90px;}
+
+  /* ===== App bar (mimics scanner top bar) ===== */
+  .appbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:14px;
+    background:#fbfaf7;border-bottom:1px solid var(--line);
+    padding:10px 20px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .logo{width:38px;height:38px;flex:0 0 auto;}
+  .brand .bname{font-weight:800;font-size:13px;line-height:1.04;color:var(--coral);letter-spacing:.3px;}
+  .appname{font-size:15px;font-weight:600;color:#3a3c3f;padding-left:14px;border-left:1px solid var(--line);}
+  .statuses{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;}
+  .chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+    padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#55585c;white-space:nowrap;}
+  .chip.coral{background:#fdeee9;border-color:#f3cdbf;color:var(--coral-dk);}
+  .chip .led{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(47,125,82,.16);}
+  .chip.volt{font-variant-numeric:tabular-nums;color:#3a3c3f;}
+  .chip.lic{background:#eaf5ee;border-color:#bfe0cb;color:#246b41;}
+
+  /* ===== Breadcrumb + page title ===== */
+  .crumb{padding:12px 26px 0;font-size:13px;color:var(--coral);font-weight:600;}
+  .crumb span{color:#a9a59b;font-weight:500;}
+  .pagehead{padding:6px 26px 4px;}
+  .pagehead h1{margin:6px 0 2px;font-size:25px;font-weight:800;letter-spacing:.2px;color:#26292c;}
+  .pagehead .lead{margin:0;color:#6f7277;font-size:14px;}
+  .pagehead .lead a{color:var(--coral-dk);}
+  .meta{margin:8px 0 0;font-size:12.5px;color:#7a7d82;}
+  .meta strong{color:#3a3c3f;}
+
+  /* ===== Toolbar buttons (scanner pill style) ===== */
+  .toolbar{position:sticky;top:59px;z-index:55;display:flex;gap:10px;align-items:center;
+    flex-wrap:wrap;background:rgba(246,244,239,.94);backdrop-filter:blur(6px);
+    padding:12px 0;margin:14px 0 4px;border-bottom:1px solid var(--line);}
+  .btn{cursor:pointer;border:1px solid var(--coral);border-radius:9px;padding:9px 18px;font-size:13.5px;
+    font-weight:700;color:#fff;background:var(--coral);box-shadow:0 1px 3px rgba(217,83,46,.3);
+    display:inline-flex;align-items:center;gap:7px;}
+  .btn:hover{background:var(--coral-dk);border-color:var(--coral-dk);}
+  .btn.alt{background:#fff;color:var(--coral-dk);}
+  .btn.alt:hover{background:#fdeee9;}
+  .note{font-size:12.5px;color:var(--muted);}
+
+  /* ===== Stat cards ===== */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 8px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    border-left:5px solid var(--c,#999);}
+  .stat .n{font-size:26px;font-weight:800;color:var(--c,#333);}
+  .stat .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+
+  /* ===== Function-card style sections (colored left accent like the app) ===== */
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:18px 22px;margin:18px 0;box-shadow:0 1px 2px rgba(0,0,0,.04);
+    border-left:5px solid var(--c,var(--coral));}
+  section.demo{--c:var(--green);} section.off{--c:var(--blue);}
+  section.rumor{--c:var(--amber);} section.no{--c:var(--red);}
+  section.gap{--c:var(--purple);} section.facts{--c:var(--coral);} section.sources{--c:var(--teal);}
+  h2{font-size:18px;margin:0 0 4px;display:flex;align-items:center;gap:11px;color:#26292c;}
+  h2 .ic{width:30px;height:30px;border-radius:50%;flex:0 0 auto;display:inline-flex;align-items:center;
+    justify-content:center;font-size:15px;background:var(--cbg,#eee);color:var(--c,#333);font-weight:800;}
+  .demo .ic{--cbg:#e6f3ec;} .off .ic{--cbg:#e6f0f9;} .rumor .ic{--cbg:#fbf1df;}
+  .no .ic{--cbg:#fbe8e6;} .gap .ic{--cbg:#f1eaf8;} .facts .ic{--cbg:#fdeee9;} .sources .ic{--cbg:#e4f4f1;}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 14px;}
+
+  /* ===== Tables ===== */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line2);vertical-align:top;}
+  th{background:#f3f1ea;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#7c7f84;
+    border-bottom:1px solid var(--line);}
+  tbody tr:nth-child(even){background:#faf9f5;}
+  tbody tr:hover{background:#fdf4ef;}
+  td.feat{font-weight:700;width:23%;color:#2f3134;}
+  td.q{color:#54585d;font-style:italic;}
+  td.src a{color:var(--coral-dk);text-decoration:none;white-space:nowrap;font-weight:700;}
+  td.src a:hover{text-decoration:underline;}
+  .pill{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:6px;letter-spacing:.4px;color:#fff;}
+  .p-demo{background:var(--green);} .p-off{background:var(--blue);}
+  .p-rumor{background:var(--amber);} .p-no{background:var(--red);} .p-gap{background:var(--purple);}
+  .date{white-space:nowrap;font-variant-numeric:tabular-nums;color:#5b5e63;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 0;font-size:13px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+
+  /* ===== Fact grid ===== */
+  .factgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
+  .fact{border:1px solid var(--line);border-left:4px solid var(--coral);border-radius:9px;padding:12px 14px;background:#fbfaf7;}
+  .fact b{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--coral-dk);margin-bottom:3px;}
+
+  /* ===== Sources ===== */
+  .src-list{font-size:12.5px;color:var(--muted);columns:2;column-gap:30px;}
+  .src-list a{color:var(--coral-dk);}
+
+  /* ===== Console log footer (mimics scanner log bar) ===== */
+  .console{background:var(--console);color:#cfd3d6;border-radius:10px;margin:22px 0 6px;
+    padding:12px 16px;font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.7;
+    box-shadow:inset 0 0 0 1px #2c3136;}
+  .console .ln{white-space:pre-wrap;}
+  .console .t{color:#6b7177;} .console .i{color:#5fb37e;} .console .w{color:#d6a24a;} .console .v{color:#7fb6e0;}
+  footer{color:var(--muted);font-size:12.5px;margin-top:14px;text-align:center;padding-bottom:8px;}
+
+  @media (max-width:760px){.src-list{columns:1;} td.feat{width:auto;} .appname{border:0;padding-left:0;}}
+  @media print{
+    body{background:#fff;font-size:11px;} .wrap{box-shadow:none;}
+    .toolbar,.appbar{position:static;}
+    .toolbar{display:none;}
+    section,.stat,.fact,.console{box-shadow:none;break-inside:avoid;}
+    a{color:#bf4525 !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<!-- ===== Scanner-style app bar ===== -->
+<div class="appbar">
+<div class="brand">
+<svg aria-label="Agile Offroad" class="logo" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+<path d="M32 4 L58 56 H44 L32 28 L20 56 H6 Z" fill="#d9532e"></path>
+<path d="M32 30 L41 50 H23 Z" fill="#ffffff"></path>
+</svg>
+<div class="bname">AGILE<br/>OFFROAD</div>
+</div>
+<div class="appname">INEOS Scanner</div>
+<div class="statuses">
+<span class="chip coral">⏻ Disconnect</span>
+<span class="chip"><span class="led"></span> J2534: Connected</span>
+<span class="chip volt">12.6 V</span>
+<span class="chip">KEY: ✓</span>
+<span class="chip lic">✓ Licensed — Valid through 2027-05-11</span>
+</div>
+</div>
+<!-- ===== Breadcrumb + page title ===== -->
+<div class="crumb">Home <span>›</span> Feature Analysis</div>
+<div class="pagehead">
+<h1>INEOS Grenadier — Software Feature Analysis</h1>
+<p class="lead">Agile Servicing Software (OBDII scanner &amp; coding tool) — compiled from all 17 pages of <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/" target="_blank">forum thread 12421872</a>. Developer: <strong>Agile Offroad</strong> (lead contact “John”; in-thread liaison &amp; beta tester “Itsdchz”).</p>
+<p class="meta">Thread span: <strong>11 May 2026 → 8 June 2026</strong> · Report generated: <strong>8 June 2026</strong> · Build referenced in screenshots: <strong>INEOS Scanner v3.3.5-beta</strong> · <strong>Auto-updated:</strong> {{LAST_UPDATED}}</p>
+</div>
+<div class="inner">
+<div class="toolbar">
+<button class="btn" onclick="exportPDF()">⬇ Export to PDF</button>
+<button class="btn alt" onclick="window.print()">🖨 Print</button>
+<span class="note">PDF button renders the full report to a downloadable file. If it stalls on a slow connection, use Print → “Save as PDF”.</span>
+</div>
+<div class="legend">
+<span><i class="p-demo"></i> <strong>Demonstrated</strong> — shown working (screenshots / “I did it”)</span>
+<span><i class="p-off"></i> <strong>Officially stated</strong> — confirmed by Agile / liaison</span>
+<span><i class="p-rumor"></i> <strong>Rumored / wishlist</strong> — user requests, “maybe / in works”</span>
+<span><i class="p-no"></i> <strong>Confirmed not supported</strong></span>
+</div>
+<div class="cards">
+<div class="stat" style="--c:var(--green)"><div class="n">{{N_DEMO}}</div><div class="l">Demonstrated</div></div>
+<div class="stat" style="--c:var(--blue)"><div class="n">{{N_OFF}}</div><div class="l">Officially stated</div></div>
+<div class="stat" style="--c:var(--amber)"><div class="n">{{N_RUMOR}}</div><div class="l">Rumored / wishlist</div></div>
+<div class="stat" style="--c:var(--red)"><div class="n">{{N_NO}}</div><div class="l">Ruled out</div></div>
+<div class="stat" style="--c:var(--purple)"><div class="n">{{N_GAP}}</div><div class="l">Competitive gaps</div></div>
+</div>
+<p class="note" style="margin:10px 2px 0;">⏱ <strong>On “time”:</strong> The forum (XenForo) publishes a <em>date</em> per post and a relative label for recent posts; an exact clock time is not exposed in page text (the “Local time” shown beside each member is that member’s current clock, not the post timestamp). Dates below are as published; relative labels (“Wed”, “Sat”) are resolved to approximate calendar dates against the 8 Jun 2026 thread date. Page # and a direct post permalink are given for every row.</p>
+<!-- ================= DEMONSTRATED ================= -->
+<section class="demo">
+<h2><span class="ic">✓</span>1 · Demonstrated Features <span class="pill p-demo">SHOWN WORKING</span></h2>
+<p class="sub">Capabilities a beta tester (or the developer) posted as actually performed, generally with photos/screenshots or video.</p>
+<table>
+<thead><tr><th>Feature / capability</th><th>Date</th><th>Pg</th><th>Quote / evidence</th><th>Source</th></tr></thead>
+<tbody><!--ROWS:demo--></tbody>
+</table>
+</section>
+<!-- ================= OFFICIAL ================= -->
+<section class="off">
+<h2><span class="ic">★</span>2 · Officially Stated Features <span class="pill p-off">CONFIRMED BY AGILE</span></h2>
+<p class="sub">Capabilities stated as confirmed or committed by Agile Offroad (directly, or relayed by the in-thread liaison “Itsdchz” from “John” / the developer).</p>
+<table>
+<thead><tr><th>Feature / capability</th><th>Date</th><th>Pg</th><th>Quote / detail</th><th>Source</th></tr></thead>
+<tbody><!--ROWS:off--></tbody>
+</table>
+</section>
+<!-- ================= RUMORED ================= -->
+<section class="rumor">
+<h2><span class="ic">?</span>3 · Rumored / Wishlist Features <span class="pill p-rumor">REQUESTED — NOT CONFIRMED</span></h2>
+<p class="sub">User-requested or speculative (“would be nice”, “maybe”, “being probed”) — not committed by Agile at time of writing.</p>
+<table>
+<thead><tr><th>Requested feature</th><th>Date</th><th>Pg</th><th>Requested by / note</th><th>Source</th></tr></thead>
+<tbody><!--ROWS:rumor--></tbody>
+</table>
+</section>
+<!-- ================= NOT SUPPORTED ================= -->
+<section class="no">
+<h2><span class="ic">⚠</span>4 · Confirmed Not Supported <span class="pill p-no">RULED OUT</span></h2>
+<table>
+<thead><tr><th>Feature</th><th>Date</th><th>Pg</th><th>Reason given</th><th>Source</th></tr></thead>
+<tbody><!--ROWS:no--></tbody>
+</table>
+</section>
+<!-- ================= KEY FACTS ================= -->
+<section class="facts">
+<h2><span class="ic">i</span>Key Product Facts at a Glance</h2>
+<div class="factgrid">
+<div class="fact"><b>Developer</b>Agile Offroad (Ineos-specific). Internal software — not a re-badged 3rd-party engine.</div>
+<div class="fact"><b>Price (target)</b>~$499 USD incl. USB dongle/OBDII reader + 2 yrs free updates. Renewal after 2 yrs explicitly <em>not</em> another $499 (TBD, minimal). Family plan ~+$100/extra Grenadier. Pro/dealer tier planned.</div>
+<div class="fact"><b>Anticipated launch</b>17 July 2026 (still in beta — Beta 3.5 as of early June).</div>
+<div class="fact"><b>Platform</b>Windows 10/11 only at launch, registered to one PC by UUID. Mac only via VM/UTM workarounds. Multi-platform = future aspiration.</div>
+<div class="fact"><b>Hardware</b>Wired USB-to-OBD dongle (Tactrix OpenPort 2.0 / clone type) supplied in bundle; ~200 units in initial stock.</div>
+<div class="fact"><b>Connectivity</b>Internet for license auth, OTA updates, security-key calc, remote support &amp; report send. DTC read/reset + basic functions work offline.</div>
+<div class="fact"><b>Licensing</b>VIN-locked, transferable to a new VIN. Software keeps running after 2-yr window (only updates/support lapse).</div>
+<div class="fact"><b>Engine coverage</b>Petrol (BMW B58) working in beta; Diesel (B57) testers just onboarded (AU &amp; UK), branching by Euro emissions market.</div>
+<div class="fact"><b>Named competitor</b>GlobeGuard (Switzerland) OBD2 service tool ≈ $1,036; Agile aims to undercut it at ~half price with more function. Users also benchmark Ross-Tech VCDS, BimmerCode, Autel.</div>
+</div>
+</section>
+<!-- ================= COMPETITIVE GAPS ================= -->
+<section class="gap">
+<h2><span class="ic">⊘</span>5 · Missing / Weaker vs. Third-Party Tools for Competitive Vehicles <span class="pill p-gap">GAP ANALYSIS</span></h2>
+<p class="sub">The Grenadier shares BMW B58 petrol / B57 diesel engines and the ZF8 transmission, so the natural competitive set is BMW/VAG-oriented 3rd-party tools — Autel MaxiSys, Ross-Tech VCDS, OBDeleven, Carly, ABRITES, GAP Diagnostic, BimmerCode, plus tuning tools (bootmod3, MHD, xHP). Items below are features those tools commonly offer that the Agile tool currently lacks, only has on its roadmap, or does in a more limited way.</p>
+<table>
+<thead><tr><th>Missing / weaker capability</th><th>Agile status</th><th>Who offers it (examples)</th><th>Why it matters</th></tr></thead>
+<tbody>
+<tr><td class="feat">Bi-directional active / output tests (actuate fans, pumps, injectors, solenoids, windows, relays)</td><td>Roadmap only (“possible”)</td><td>Autel MaxiSys (3000+ tests), OBDeleven, Carly</td><td>Lets you command components to verify the part vs. the circuit — core diagnostics, not just code clearing.</td></tr>
+<tr><td class="feat">Live data streaming, PID graphing &amp; data logging/recording</td><td>Not mentioned (scans only)</td><td>VCDS, Autel, OBDeleven, Carly</td><td>Real-time sensor values and logs are essential for chasing intermittent faults and tuning.</td></tr>
+<tr><td class="feat">Freeze-frame data capture</td><td>Not mentioned</td><td>Autel, VCDS, generic OBDII</td><td>Snapshot of conditions when a fault set — standard diagnostic context.</td></tr>
+<tr><td class="feat">OBDII readiness/emissions monitors, smog-check status, Mode 6 test results</td><td>Not mentioned</td><td>Most generic + pro scanners</td><td>Needed to confirm a vehicle will pass inspection after repairs/clears.</td></tr>
+<tr><td class="feat">ECU flashing / firmware reprogramming (J2534)</td><td>Coding only, no flashing</td><td>Autel Elite/Ultra, OEM J2534</td><td>Recover/update module firmware; Agile changes parameters but does not reflash.</td></tr>
+<tr><td class="feat">Performance / power tuning (B58 stage maps)</td><td>“Drag race mode” coding only</td><td>bootmod3, MHD, JB4</td><td>Real power/torque gains — Agile toggles a mode but does not remap fuel/boost.</td></tr>
+<tr><td class="feat">Transmission (ZF8) tuning / adaptation reset &amp; relearn</td><td>Not mentioned</td><td>xHP Flashtool, Autel</td><td>Shift-firmness, adaptation resets after service — popular on ZF8 platforms.</td></tr>
+<tr><td class="feat">Key programming / immobilizer / add-key</td><td>Not mentioned</td><td>Autel IM-series, ABRITES</td><td>Add/replace keys, anti-theft service — common indie-shop need.</td></tr>
+<tr><td class="feat">ADAS camera/radar calibration</td><td>Explicitly NOT supported</td><td>Autel (with target frames)</td><td>Required after windshield/camera work; Agile needs a dealer/calibration rig.</td></tr>
+<tr><td class="feat">Battery registration / coding after battery replacement</td><td>Not mentioned</td><td>Carly, OBDeleven, Autel</td><td>BMW-platform vehicles need the new battery registered for correct charging.</td></tr>
+<tr><td class="feat">Electronic parking-brake (EPB) service &amp; brake bleeding</td><td>Not mentioned</td><td>Autel, VCDS</td><td>Retract EPB for pad changes; ABS-pump bleed routines.</td></tr>
+<tr><td class="feat">Steering-angle (SAS) calibration</td><td>Not mentioned</td><td>Autel, VCDS</td><td>Required after alignment / suspension / steering work.</td></tr>
+<tr><td class="feat">DPF forced regeneration, AdBlue/SCR &amp; EGR service routines</td><td>Diesel only just entering beta</td><td>Autel, OBDeleven</td><td>Diesel B57 owners need active regen and emissions resets.</td></tr>
+<tr><td class="feat">Injector coding / fuel-trim adaptation</td><td>Not mentioned</td><td>Autel, OEM tools</td><td>Code new injectors / reset adaptations after fuel-system work.</td></tr>
+<tr><td class="feat">Native mobile app (iOS/Android) with wireless Bluetooth dongle</td><td>Windows + wired only</td><td>OBDeleven, Carly, BimmerCode</td><td>Phone-based coding is the dominant consumer model — no laptop required.</td></tr>
+<tr><td class="feat">Cross-platform native client (macOS / Linux)</td><td>Windows-only (VM workaround)</td><td>App-based competitors; VCDS (Win)</td><td>Large share of Grenadier owners are Mac/iPad users (per thread).</td></tr>
+<tr><td class="feat">Fully offline coding (no server security-key calc)</td><td>Needs server for key calc</td><td>VCDS, OBDeleven (largely offline)</td><td>Coding in the field / no-signal areas — relevant for an overland vehicle.</td></tr>
+<tr><td class="feat">Cloud vehicle profile / digital garage / maintenance history</td><td>Local save/restore only</td><td>Carly Digital Garage</td><td>Cross-device config backup &amp; service-history tracking.</td></tr>
+<tr><td class="feat">Used-car / mileage-tamper &amp; health check report</td><td>Not offered</td><td>Carly</td><td>Pre-purchase inspection &amp; odometer-fraud detection.</td></tr>
+<tr><td class="feat">Built-in performance measurement (0–60, dyno, drag timer)</td><td>Not offered (coding mode only)</td><td>OBDeleven One-Click apps, Carly</td><td>Owner-fun + before/after benchmarking.</td></tr>
+<tr><td class="feat">Multi-brand / multi-make support</td><td>Ineos-only (by design)</td><td>Autel, OBDeleven (VAG), Carly (BMW+)</td><td>One tool for a mixed garage — Agile’s depth trades off breadth.</td></tr>
+<tr><td class="feat">Low-cost multi-VIN (club/shop) licensing</td><td>VIN-locked; Pro tier TBD</td><td>VCDS (3-VIN), Autel (unlimited)</td><td>Clubs &amp; indie shops service many vehicles on one license.</td></tr>
+<tr><td class="feat">Wireless VCI, DoIP &amp; CAN-FD high-speed protocol support</td><td>Wired USB dongle</td><td>Autel (wireless VCI, DoIP/CAN-FD)</td><td>Faster, untethered comms &amp; newer-protocol future-proofing.</td></tr>
+<tr><td class="feat">Guided fault-finding, repair info &amp; wiring diagrams</td><td>Not offered</td><td>Autel, Identifix-style platforms</td><td>Step-by-step repair guidance beyond code lookup.</td></tr>
+<tr><td class="feat">Free / freemium entry tier</td><td>One-time ~$499 bundle</td><td>OBDeleven (free credits), Carista (free tier)</td><td>Lower barrier to try basic functions before committing.</td></tr>
+</tbody>
+</table>
+<p class="note" style="margin-top:12px;">Caveat: Agile is a brand-dedicated tool still in beta and improving weekly, so several gaps above (bi-directional control, diesel/DPF service, more platforms) are explicitly on its stated roadmap. Conversely, its Ineos-specific reverse engineering — a deciphered non-generic DTC database mapped to exact modules, deep head-unit unlock, and granular TPMS threshold/preset control — exceeds what generic multi-brand tools typically offer for the Grenadier.</p>
+</section>
+<!-- ================= SOURCES ================= -->
+<section class="sources">
+<h2><span class="ic">⛓</span>Sources</h2>
+<p class="sub">Primary — all 17 pages of the forum thread (each linked); competitive capabilities verified via vendor/review sources.</p>
+<div class="src-list">
+<a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/" target="_blank">Thread p.1</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-2" target="_blank">p.2</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-3" target="_blank">p.3</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-4" target="_blank">p.4</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-5" target="_blank">p.5</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-6" target="_blank">p.6</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-7" target="_blank">p.7</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-8" target="_blank">p.8</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-9" target="_blank">p.9</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-10" target="_blank">p.10</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-11" target="_blank">p.11</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-12" target="_blank">p.12</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-13" target="_blank">p.13</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-14" target="_blank">p.14</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-15" target="_blank">p.15</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-16" target="_blank">p.16</a> ·
+      <a href="https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/page-17" target="_blank">p.17</a> ·
+      <a href="https://iamcarhacker.com/obdeleven-vs-carly-vs-carista/" target="_blank">OBDeleven vs Carly vs Carista (iamcarhacker)</a> ·
+      <a href="https://obdeleven.com/features/adaptation" target="_blank">OBDeleven — Adaptations</a> ·
+      <a href="https://www.autel.com/mk3/3722.jhtml" target="_blank">Autel MaxiSys MS906 Pro</a> ·
+      <a href="https://store.autel.com/products/maxisys-elite-ii-pro" target="_blank">Autel MaxiSys Elite II Pro (active tests / ECU programming / ADAS)</a>
+</div>
+</section>
+<!-- ================= CONSOLE LOG (scanner-style) ================= -->
+<div aria-hidden="true" class="console">
+<div class="ln"><span class="t">[18:17:00.229]</span> <span class="i">[INFO]</span> Action database: 4638 DTCs loaded (v2 rewritten)</div>
+<div class="ln"><span class="t">[18:17:00.504]</span> <span class="i">[INFO]</span> Cloud server: Connected (auth enabled)</div>
+<div class="ln"><span class="t">[18:17:01.118]</span> <span class="i">[INFO]</span> Source ingest: 17 forum pages parsed — thread 12421872</div>
+<div class="ln"><span class="t">[18:17:01.640]</span> <span class="i">[INFO]</span> Feature index built — <span class="v">demonstrated=19</span> <span class="v">official=24</span> <span class="v">rumored=24</span> <span class="v">ruled_out=1</span></div>
+<div class="ln"><span class="t">[18:17:02.003]</span> <span class="w">[WARN]</span> Competitive gap scan: 25 capabilities absent / roadmap-only vs. 3rd-party tools</div>
+<div class="ln"><span class="t">[18:17:02.219]</span> <span class="i">[INFO]</span> Report ready — export to PDF available</div>
+</div>
+<footer>
+    Compiled 8 June 2026 from the public forum thread. Categorizations (Demonstrated / Official / Rumored) reflect how each item was characterized in-thread at time of reading; beta software, subject to change. “Itsdchz” acts as the in-thread Agile liaison relaying developer/“John” statements. Styling is a tribute to the Agile Off-Road INEOS Scanner UI; this report is an independent community summary, not an Agile Offroad product.
+  </footer>
+</div><!-- /.inner -->
+</div>
+<script>
+function exportPDF(){
+  var btns = document.querySelector('.toolbar');
+  if(btns) btns.style.display='none';
+  var el = document.querySelector('.wrap');
+  var opt = {
+    margin:[8,8,8,8],
+    filename:'Agile_Ineos_Scanner_Feature_Analysis.pdf',
+    image:{type:'jpeg',quality:0.97},
+    html2canvas:{scale:2,useCORS:true,scrollY:0},
+    jsPDF:{unit:'mm',format:'a3',orientation:'landscape'},
+    pagebreak:{mode:['css','legacy'],avoid:['tr','section','.fact','.stat']}
+  };
+  if(typeof html2pdf==='undefined'){
+    if(btns) btns.style.display='';
+    window.print();
+    return;
+  }
+  html2pdf().set(opt).from(el).save().then(function(){
+    if(btns) btns.style.display='';
+  }).catch(function(){
+    if(btns) btns.style.display='';
+    window.print();
+  });
+}
+</script>
+</body>
+</html>
