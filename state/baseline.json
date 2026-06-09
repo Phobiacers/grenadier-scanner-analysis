@@ -1,0 +1,274 @@
+[
+ {
+  "category": "demonstrated",
+  "feature": "Service-reminder reset (fixed the “Y2K” service bug DIY)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "TPMS clone"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Module scan — found 9 soft-code errors"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "DTC read & reset — works offline"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Head-Unit unlock — secret/engineering menus & hidden off-road tiles"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Airbag / SRS DTC reset"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "HU button-label text editing"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Independent live demo (John, at Overland Expo)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Walk-through demo videos (YouTube)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "“God mode” — full HU decryption, audio/visual parameter editing"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Chime / bong / ding sound changes (incl. novelty voices) + splash-screen customization"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "TPMS — set pressure thresholds, save presets, “TPMS wake-up” (Beta 3.5)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Expert Coding — save / read / write / revert ECU config versions (Beta 3.5)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Service Reset — preset interval by date or mileage (Beta 3.5)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "DTC cross-reference to exact Ineos module/ECU (non-generic DB) (Beta 3.5)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Scan all modules — quick (15–20 s) & deep-dive (10–15 min); txt & PDF report export (Beta 3.5)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Expert Coding for TPMS — disable warnings, presets (Factory/Offroad/Mid/Aggressive), debounce & calibration table (Beta 3.5)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "New “HUGE module” — toggle features on/off + customize presets, sound, visuals, warnings, menus (screenshots)"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "TPMS — manually write / program any compatible sensor ID into the module"
+ },
+ {
+  "category": "official",
+  "feature": "Service-reminder reset + lengthen/shorten interval (time & mileage)"
+ },
+ {
+  "category": "official",
+  "feature": "Health Scan + Deep-Dive Scan"
+ },
+ {
+  "category": "official",
+  "feature": "TPMS — clone, copy, move, learn"
+ },
+ {
+  "category": "official",
+  "feature": "Pro/dealer module value changes (customize characteristics)"
+ },
+ {
+  "category": "official",
+  "feature": "Backup / restore module settings (write back later)"
+ },
+ {
+  "category": "official",
+  "feature": "Service-interval reset & TPMS relearn — confirmed done ✅"
+ },
+ {
+  "category": "official",
+  "feature": "Offline mode — DTC read/reset offline; security-key functions (TPMS/coding/service) need server"
+ },
+ {
+  "category": "official",
+  "feature": "OTA software download + auto-updates on server ping"
+ },
+ {
+  "category": "official",
+  "feature": "Deciphered, cross-referenced DTC database (not generic OBD)"
+ },
+ {
+  "category": "official",
+  "feature": "Multiple ECUs unlocked (head unit, lighting, sound) + parameter customization"
+ },
+ {
+  "category": "official",
+  "feature": "Customization of lighting, sound, lane-departure & ADAS “already in progress”"
+ },
+ {
+  "category": "official",
+  "feature": "ADAS disable on MY2026 (no idiot lights) — in active development"
+ },
+ {
+  "category": "official",
+  "feature": "Permanent silence of lane-departure chime (no dash light) — “in the works”"
+ },
+ {
+  "category": "official",
+  "feature": "Start/Stop & auto on/off persistence between cycles — on roadmap"
+ },
+ {
+  "category": "official",
+  "feature": "Diesel B57 support — beta testers onboarded (AU & UK)"
+ },
+ {
+  "category": "official",
+  "feature": "Remote-login support + send txt/PDF readings to service provider"
+ },
+ {
+  "category": "official",
+  "feature": "Licensing: VIN-locked, transferable to a different VIN; ~$499 incl. dongle; 2 yrs free updates"
+ },
+ {
+  "category": "official",
+  "feature": "Multi-Grenadier “family plan” (~+$100/vehicle, capped) + Pro/dealer tier planned"
+ },
+ {
+  "category": "official",
+  "feature": "Bi-directional / actuation control — “possible,” roadmap after module customization ships"
+ },
+ {
+  "category": "official",
+  "feature": "Hardware: bundle = dongle + USB cable + media; 200 units in stock; one PC by UUID"
+ },
+ {
+  "category": "official",
+  "feature": "Platform: Windows-only at launch; native multi-platform a future aspiration"
+ },
+ {
+  "category": "official",
+  "feature": "Positioning: “more functionality than Globe Guard at half the price”"
+ },
+ {
+  "category": "official",
+  "feature": "Anticipated launch date — 17 July 2026"
+ },
+ {
+  "category": "official",
+  "feature": "ECU-bricking risk acknowledged; safe presets vs. “God mode” expert writes"
+ },
+ {
+  "category": "rumored",
+  "feature": "ADAS module disable + suppress telltale lights (early request)"
+ },
+ {
+  "category": "rumored",
+  "feature": "Auto Start/Stop software disable"
+ },
+ {
+  "category": "rumored",
+  "feature": "Use aux lights without engaging off-road mode"
+ },
+ {
+  "category": "rumored",
+  "feature": "Engage rear diff lock in High range"
+ },
+ {
+  "category": "rumored",
+  "feature": "MPH ↔ KPH / distance-unit toggle (e.g. re-enable km on US spec)"
+ },
+ {
+  "category": "rumored",
+  "feature": "Enable wired Android Auto"
+ },
+ {
+  "category": "rumored",
+  "feature": "Enter/exit coolant-purge & other service modes"
+ },
+ {
+  "category": "rumored",
+  "feature": "Bi-directional fuel/emissions diagnostics (HP fuel, injectors, fuel pump, MAF/MAP, NOx, DPF, AdBlue)"
+ },
+ {
+  "category": "rumored",
+  "feature": "Remove NATO-plug winch speed lockout (BCM)"
+ },
+ {
+  "category": "rumored",
+  "feature": "Use winch while in Park"
+ },
+ {
+  "category": "rumored",
+  "feature": "Finer stereo volume steps / raise max volume"
+ },
+ {
+  "category": "rumored",
+  "feature": "Climate temp calibration / adjustable auto-climate low setpoint"
+ },
+ {
+  "category": "rumored",
+  "feature": "Persist off-road mode + axle-locker status across engine restart"
+ },
+ {
+  "category": "rumored",
+  "feature": "Fuel-gauge / miles-to-empty calibration offset"
+ },
+ {
+  "category": "rumored",
+  "feature": "Re-enable petrol engine oil-temperature display"
+ },
+ {
+  "category": "rumored",
+  "feature": "Disable / defeat AdBlue (SCR)"
+ },
+ {
+  "category": "rumored",
+  "feature": "Disable wiper “last wipe” behaviour"
+ },
+ {
+  "category": "rumored",
+  "feature": "Native iOS / iPad app"
+ },
+ {
+  "category": "rumored",
+  "feature": "Disable ALL bongs/chimes globally"
+ },
+ {
+  "category": "rumored",
+  "feature": "Disable torque-converter disconnect at stop (esp. off-road mode)"
+ },
+ {
+  "category": "rumored",
+  "feature": "Disable “take a break” driver-attention warning"
+ },
+ {
+  "category": "rumored",
+  "feature": "Software-license-only option (no dongle, lower price)"
+ },
+ {
+  "category": "rumored",
+  "feature": "Explicit Standard / Advanced / Pro tier structure"
+ },
+ {
+  "category": "rumored",
+  "feature": "Reset dash warning lights after battery disconnect"
+ },
+ {
+  "category": "not_supported",
+  "feature": "ADAS camera/radar recalibration (e.g. after windshield replacement)"
+ }
+]

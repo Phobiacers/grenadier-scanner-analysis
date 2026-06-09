@@ -1,101 +1,95 @@
 #!/usr/bin/env python3
 """
-Agile / INEOS Grenadier scanner thread -> auto-updating feature page.
+Agile / INEOS Grenadier scanner thread -> FROZEN baseline + guarded new-feature tracker.
 
-What it does on every run:
-  1. Scrapes every page of the forum thread (auto-detecting how many pages exist).
-  2. Finds posts it has never seen before (tracked in state/seen.json).
-  3. Sends each NEW post to the Anthropic API, which classifies it as
-     demonstrated / official / rumored / not_supported / none and pulls a short quote.
-  4. Merges results into state/features.json (the source of truth).
-  5. Re-renders index.html from index.template.html.
+Philosophy (v2):
+  * The curated report baked into index.template.html is FROZEN. The script never
+    touches it.
+  * The only thing the script edits is the "New Since Baseline" section. A forum post
+    is added there ONLY when it is:
+       (a) newer than the baseline (its post id is not in state/seen.json), AND
+       (b) judged by the model to describe a GENUINELY NEW feature / development that is
+           NOT already represented in the curated baseline (state/baseline.json) or in
+           items already added.
+  * Result: no bloat, no rewriting your good analysis, and the live page only changes
+    when something genuinely new appears.
 
-Designed to be run by GitHub Actions on a schedule. Idempotent: re-running with no
-new posts produces no changes, so the workflow only commits when something is new.
+State files:
+  state/baseline.json   – the 68 curated feature labels (the "already known" set). Static.
+  state/seen.json       – post ids already processed (pre-seeded with the whole thread).
+  state/new_features.json – the small, growing list of genuinely-new items. Authored here.
 
-Env vars:
-  ANTHROPIC_API_KEY   (required) – your Anthropic key
-  ANTHROPIC_MODEL     (optional) – default 'claude-haiku-4-5'
-  THREAD_URL          (optional) – override the thread base URL
+Env: ANTHROPIC_API_KEY (required), ANTHROPIC_MODEL (default claude-haiku-4-5),
+     THREAD_URL (optional override).
 """
 
 import os, re, sys, json, time, html, datetime, pathlib
 import requests
 from bs4 import BeautifulSoup
 
-# ---------------------------------------------------------------- config
 THREAD_URL = os.environ.get(
     "THREAD_URL",
     "https://www.theineosforum.com/threads/"
     "agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/",
 ).rstrip("/") + "/"
-MODEL   = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5")
-HERE    = pathlib.Path(__file__).resolve().parent
-STATE   = HERE / "state"
-STATE.mkdir(exist_ok=True)
-SEEN_F  = STATE / "seen.json"
-FEAT_F  = STATE / "features.json"
-TPL_F   = HERE / "index.template.html"
-OUT_F   = HERE / "index.html"
+MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5")
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; GrenadierFeatureBot/1.0; "
-                  "+personal feature tracker, polite single-thread scrape)"
-}
-MAX_PAGES   = 200          # hard safety cap
-PAGE_DELAY  = 2.0          # seconds between page fetches (be polite)
-CATEGORIES  = {"demonstrated", "official", "rumored", "not_supported"}
+HERE  = pathlib.Path(__file__).resolve().parent
+STATE = HERE / "state"; STATE.mkdir(exist_ok=True)
+SEEN_F = STATE / "seen.json"
+BASE_F = STATE / "baseline.json"
+NEW_F  = STATE / "new_features.json"
+TPL_F  = HERE / "index.template.html"
+OUT_F  = HERE / "index.html"
 
-# ---------------------------------------------------------------- scraping
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; GrenadierFeatureBot/2.0; polite single-thread tracker)"}
+MAX_PAGES, PAGE_DELAY = 200, 2.0
+CATEGORIES = {"demonstrated", "official", "rumored", "not_supported"}
+CAT_LABEL  = {"demonstrated": "Demonstrated", "official": "Official",
+              "rumored": "Rumored", "not_supported": "Not supported"}
+CAT_PILL   = {"demonstrated": "p-demo", "official": "p-off",
+              "rumored": "p-rumor", "not_supported": "p-no"}
+
+# ----------------------------------------------------------------- scraping
 def fetch(url):
-    r = requests.get(url, headers=HEADERS, timeout=30)
-    r.raise_for_status()
-    return r.text
+    r = requests.get(url, headers=HEADERS, timeout=30); r.raise_for_status(); return r.text
 
 def page_url(n):
     return THREAD_URL if n == 1 else f"{THREAD_URL}page-{n}"
 
 def parse_posts(page_html, page_no):
-    """Return list of dicts for each post article on a XenForo page."""
     soup = BeautifulSoup(page_html, "html.parser")
-    posts = []
+    out = []
     for art in soup.select("article.message--post, article.message"):
-        # post id (e.g. "post-1333392558")
         cid = art.get("data-content") or ""
         if not cid.startswith("post-"):
             continue
         author = art.get("data-author") or ""
-        # exact timestamp from the <time datetime="..."> element
-        t = art.find("time")
-        iso = (t.get("datetime") if t else "") or ""
-        # post number + permalink (#NN link in the attribution bar)
-        num, url = "", page_url(page_no) + "#" + cid
-        link = art.select_one(".message-attribution-opposite a[href*='/post-'], "
-                              "a.message-attribution-gadget[href*='/post-']")
-        if not link:
-            # fallback: any anchor whose text is like "#123"
-            for a in art.select("a"):
-                if a.get_text(strip=True).startswith("#"):
-                    link = a; break
-        if link:
-            num = link.get_text(strip=True).lstrip("#")
-            href = link.get("href", "")
-            if href:
-                url = href if href.startswith("http") else \
-                      "https://www.theineosforum.com" + href
-        # body text (strip nested quotes so we judge the author's own words)
+        t = art.find("time"); iso = (t.get("datetime") if t else "") or ""
+        # decouple permalink (href with /post-) from the visible "#NN" number
+        perma, num = "", ""
+        for a in art.select("a[href]"):
+            href = a.get("href", "")
+            if "/post-" in href and not perma:
+                perma = href if href.startswith("http") else "https://www.theineosforum.com" + href
+            txt = a.get_text(strip=True)
+            if re.fullmatch(r"#\d+", txt) and not num:
+                num = txt[1:]
+            if perma and num:
+                break
+        url = perma or (page_url(page_no) + "#" + cid)
         body = art.select_one(".message-body .bbWrapper") or art.select_one(".bbWrapper")
         text = ""
         if body:
             for bq in body.select("blockquote"):
                 bq.decompose()
             text = body.get_text("\n", strip=True)
-        posts.append({"id": cid, "author": author, "iso": iso,
-                      "num": num, "url": url, "page": page_no, "text": text})
-    return posts
+        out.append({"id": cid, "author": author, "iso": iso, "num": num,
+                    "url": url, "page": page_no, "text": text})
+    return out
 
 def scrape_all():
-    all_posts, page = [], 1
+    posts, page = [], 1
     while page <= MAX_PAGES:
         try:
             ph = fetch(page_url(page))
@@ -103,161 +97,172 @@ def scrape_all():
             if e.response is not None and e.response.status_code == 404:
                 break
             raise
-        posts = parse_posts(ph, page)
-        if not posts:
+        got = parse_posts(ph, page)
+        if not got:
             break
-        all_posts.extend(posts)
-        # stop if this page repeats the last id of the previous page (no real next page)
-        print(f"  page {page}: {len(posts)} posts")
-        page += 1
+        posts.extend(got); print(f"  page {page}: {len(got)} posts"); page += 1
         time.sleep(PAGE_DELAY)
-    # de-dupe by id, keep first occurrence
     seen, uniq = set(), []
-    for p in all_posts:
+    for p in posts:
         if p["id"] not in seen:
             seen.add(p["id"]); uniq.append(p)
     return uniq
 
-# ---------------------------------------------------------------- classification
+# ----------------------------------------------------------------- novelty gate
+_STOP = {"the", "a", "an", "to", "of", "for", "and", "or", "with", "set", "new",
+         "enable", "disable", "change", "via", "your", "all"}
+
+def _tokens(s):
+    raw = re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).split()
+    toks = set()
+    for w in raw:
+        if w in _STOP:
+            continue
+        if len(w) > 3 and w.endswith("s"):   # crude singularize (thresholds->threshold)
+            w = w[:-1]
+        toks.add(w)
+    return toks
+
+def _norm(s):
+    return " ".join(sorted(_tokens(s)))
+
+def _similar(a, b):
+    """True if two feature labels likely describe the same thing."""
+    ta, tb = _tokens(a), _tokens(b)
+    if not ta or not tb:
+        return False
+    na, nb = " ".join(sorted(ta)), " ".join(sorted(tb))
+    if na in nb or nb in na:
+        return True
+    inter = len(ta & tb)
+    return inter / max(1, min(len(ta), len(tb))) >= 0.6
+
+def is_duplicate(feature, known_labels):
+    return any(_similar(feature, k) for k in known_labels)
+
 SYSTEM = (
-    "You analyze posts from a forum thread about the Agile Offroad 'INEOS Scanner' — "
-    "a Windows OBDII diagnostic & coding tool for the Ineos Grenadier. "
-    "Decide whether a post describes a SOFTWARE FEATURE or CAPABILITY, and classify it.\n"
-    "Categories:\n"
-    "  demonstrated  – someone shows it working (screenshots, 'I did X', 'it works').\n"
-    "  official      – stated/confirmed/committed by Agile, the developer 'John', or the "
-    "liaison 'Itsdchz' relaying them (incl. 'in the works', 'on the roadmap', pricing, "
-    "release date, platform/hardware facts).\n"
-    "  rumored       – a user request / wishlist / speculation not confirmed by Agile.\n"
-    "  not_supported – explicitly stated the tool cannot or will not do it.\n"
-    "  none          – general chit-chat, no feature content.\n"
-    "A post may contain MORE THAN ONE feature. Return STRICT JSON only, an array; "
-    "each element: {\"category\":..., \"feature\":\"short label\", "
-    "\"quote\":\"<=1 sentence verbatim from the post\"}. "
-    "Use [] if the post has no feature content. No prose outside the JSON."
+    "You triage posts from a forum thread about the Agile Offroad 'INEOS Scanner' "
+    "(a Windows OBDII diagnostic & coding tool for the Ineos Grenadier). "
+    "Your job is HIGH-PRECISION: only surface a post when it announces or demonstrates a "
+    "GENUINELY NEW feature, capability, or concrete development.\n"
+    "You are given a list of ALREADY-KNOWN features. If the post merely discusses, asks "
+    "about, repeats, reacts to, or is a small variation of something already known — or is "
+    "general chit-chat, opinion, pricing debate, or thanks — return an EMPTY array.\n"
+    "Categories: demonstrated (shown working), official (confirmed/committed by Agile, dev "
+    "'John', or liaison 'Itsdchz', incl. 'in the works'/roadmap/firm dates), rumored (a "
+    "clearly new user feature request not previously raised), not_supported (newly stated "
+    "the tool can't/won't do something).\n"
+    "Return STRICT JSON only: an array (usually empty or ONE item). Each item: "
+    '{"category":..., "feature":"short label", "quote":"<=1 sentence verbatim"}. '
+    "No prose outside the JSON. Be conservative: when in doubt, return []."
 )
 
-def classify(client, post):
-    snippet = post["text"][:6000]
-    if not snippet.strip():
+def classify_new(client, post, known_labels):
+    snippet = (post["text"] or "").strip()
+    if len(snippet) < 8:
         return []
-    user = (f"Author: {post['author']}\nPost #{post['num']} (page {post['page']})\n\n"
-            f"POST TEXT:\n{snippet}")
+    known_block = "\n".join(f"- {k}" for k in known_labels)
+    user = (f"ALREADY-KNOWN FEATURES (do NOT resurface these or close variants):\n{known_block}\n\n"
+            f"---\nNEW POST  (author {post['author']}, #{post['num']}, page {post['page']}):\n{snippet[:6000]}")
     for attempt in range(3):
         try:
-            msg = client.messages.create(
-                model=MODEL, max_tokens=1024, system=SYSTEM,
-                messages=[{"role": "user", "content": user}],
-            )
+            msg = client.messages.create(model=MODEL, max_tokens=700, system=SYSTEM,
+                                         messages=[{"role": "user", "content": user}])
             raw = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
             m = re.search(r"\[.*\]", raw, re.S)
             data = json.loads(m.group(0) if m else raw)
-            out = []
+            res = []
             for d in data:
                 cat = str(d.get("category", "")).strip().lower()
-                if cat in CATEGORIES and d.get("feature"):
-                    out.append({"category": cat,
-                                "feature": str(d["feature"]).strip(),
+                feat = str(d.get("feature", "")).strip()
+                if cat in CATEGORIES and feat and not is_duplicate(feat, known_labels):
+                    res.append({"category": cat, "feature": feat,
                                 "quote": str(d.get("quote", "")).strip()})
-            return out
+            return res
         except Exception as e:
             if attempt == 2:
                 print(f"  ! classify failed for {post['id']}: {e}")
                 return []
             time.sleep(2 * (attempt + 1))
 
-# ---------------------------------------------------------------- rendering
+# ----------------------------------------------------------------- render
 def fmt_date(iso):
-    """'2026-05-12T18:48:01-0700' -> ('12 May 2026','18:48')."""
     if not iso:
-        return ("—", "—")
+        return ("—", "")
     try:
-        s = iso.replace("Z", "+00:00")
-        # XenForo gives +0000 (no colon) sometimes; normalize
-        s = re.sub(r"([+-]\d{2})(\d{2})$", r"\1:\2", s)
+        s = re.sub(r"([+-]\d{2})(\d{2})$", r"\1:\2", iso.replace("Z", "+00:00"))
         dt = datetime.datetime.fromisoformat(s)
         return (dt.strftime("%-d %b %Y"), dt.strftime("%H:%M"))
     except Exception:
-        return (iso[:10], iso[11:16] if len(iso) > 15 else "—")
+        return (iso[:10], iso[11:16] if len(iso) > 15 else "")
 
 def esc(s):
     return html.escape(s or "", quote=True)
 
-def rows_for(features, category):
-    items = [f for f in features if f["category"] == category]
-    # sort by timestamp then post number
-    items.sort(key=lambda f: (f.get("iso", ""), int(f.get("num") or 0)))
-    out = []
-    for f in items:
-        d, t = fmt_date(f.get("iso", ""))
-        when = f"{d}" + (f"<br><span style='color:#9a9da1'>{t}</span>" if t != "—" else "")
-        src = f.get("num") or "link"
-        out.append(
-            "<tr>"
-            f"<td class='feat'>{esc(f['feature'])}</td>"
-            f"<td class='date'>{when}</td>"
-            f"<td>{esc(str(f.get('page','')))}</td>"
-            f"<td class='q'>{esc(f.get('quote',''))}</td>"
-            f"<td class='src'><a href='{esc(f.get('url','#'))}' target='_blank'>#{esc(src)}</a></td>"
-            "</tr>"
-        )
-    return "\n".join(out) or "<tr><td colspan='5' style='color:#9a9da1'>No items yet.</td></tr>"
-
-def render(features):
+def render(new_items):
     tpl = TPL_F.read_text(encoding="utf-8")
-    counts = {c: sum(1 for f in features if f["category"] == c) for c in CATEGORIES}
-    repl = {
-        "<!--ROWS:demo-->":  rows_for(features, "demonstrated"),
-        "<!--ROWS:off-->":   rows_for(features, "official"),
-        "<!--ROWS:rumor-->": rows_for(features, "rumored"),
-        "<!--ROWS:no-->":    rows_for(features, "not_supported"),
-        "{{N_DEMO}}":  str(counts["demonstrated"]),
-        "{{N_OFF}}":   str(counts["official"]),
-        "{{N_RUMOR}}": str(counts["rumored"]),
-        "{{N_NO}}":    str(counts["not_supported"]),
-        "{{N_GAP}}":   "25",  # competitive gaps are a static curated section
-        "{{LAST_UPDATED}}": datetime.datetime.now(datetime.timezone.utc)
-                              .strftime("%-d %b %Y %H:%M UTC"),
-    }
-    for k, v in repl.items():
-        tpl = tpl.replace(k, v)
+    if not new_items:
+        rows = ("<tr><td colspan='6' class='empty'>No new features detected since the "
+                "8 Jun 2026 baseline. The daily job is watching for them.</td></tr>")
+        last = "— none yet (baseline only)"
+    else:
+        items = sorted(new_items, key=lambda f: (f.get("iso", ""), int(f.get("num") or 0)))
+        out = []
+        for f in items:
+            d, t = fmt_date(f.get("iso", ""))
+            when = d + (f"<br><span style='color:#9a9da1'>{t}</span>" if t else "")
+            num = f.get("num") or ""
+            src = (f"#{esc(num)}" if num else "↗ post")
+            pill = CAT_PILL.get(f["category"], "p-na")
+            out.append(
+                "<tr>"
+                f"<td><span class='pill {pill}'>{esc(CAT_LABEL.get(f['category'],''))}</span></td>"
+                f"<td class='feat'>{esc(f['feature'])}</td>"
+                f"<td class='date'>{when}</td>"
+                f"<td>{esc(str(f.get('page','')))}</td>"
+                f"<td class='q'>{esc(f.get('quote',''))}</td>"
+                f"<td class='src'><a href='{esc(f.get('url','#'))}' target='_blank'>{src}</a></td>"
+                "</tr>"
+            )
+        rows = "\n".join(out)
+        newest = max(items, key=lambda f: f.get("iso", ""))
+        nd, _ = fmt_date(newest.get("iso", ""))
+        last = f"{nd} ({len(items)} item{'s' if len(items)!=1 else ''} added)"
+    tpl = tpl.replace("<!--ROWS:new-->", rows).replace("{{LAST_NEW}}", last)
     OUT_F.write_text(tpl, encoding="utf-8")
 
-# ---------------------------------------------------------------- main
+# ----------------------------------------------------------------- main
 def main():
-    seen     = set(json.loads(SEEN_F.read_text())) if SEEN_F.exists() else set()
-    features = json.loads(FEAT_F.read_text()) if FEAT_F.exists() else []
+    seen  = set(json.loads(SEEN_F.read_text())) if SEEN_F.exists() else set()
+    known = json.loads(BASE_F.read_text()) if BASE_F.exists() else []
+    known_labels = [k["feature"] for k in known]
+    new_items = json.loads(NEW_F.read_text()) if NEW_F.exists() else []
 
-    print(f"Scraping: {THREAD_URL}")
+    print(f"Baseline known features: {len(known_labels)} | already-seen posts: {len(seen)}")
     posts = scrape_all()
-    print(f"Total posts on thread: {len(posts)}  (already seen: {len(seen)})")
-    new = [p for p in posts if p["id"] not in seen]
-    print(f"New posts to classify: {len(new)}")
+    candidates = [p for p in posts if p["id"] not in seen]
+    print(f"Thread posts: {len(posts)} | new (post-baseline) candidates: {len(candidates)}")
 
-    if new:
+    added = 0
+    if candidates:
         import anthropic
         client = anthropic.Anthropic()
-        for i, p in enumerate(new, 1):
-            print(f"[{i}/{len(new)}] {p['id']} (#{p['num']})")
-            for f in classify(client, p):
+        # running set of labels = baseline + already-added new items (avoid dupes across runs)
+        live_labels = list(known_labels) + [n["feature"] for n in new_items]
+        for i, p in enumerate(candidates, 1):
+            hits = classify_new(client, p, live_labels)
+            tag = f" -> +{len(hits)} NEW" if hits else ""
+            print(f"[{i}/{len(candidates)}] {p['id']} (#{p['num']}){tag}")
+            for f in hits:
                 f.update(iso=p["iso"], page=p["page"], url=p["url"],
                          author=p["author"], num=p["num"], id=p["id"])
-                features.append(f)
+                new_items.append(f); live_labels.append(f["feature"]); added += 1
             seen.add(p["id"])
 
-    # de-dupe features (same post + same feature label)
-    uniq, keys = [], set()
-    for f in features:
-        k = (f.get("id"), f.get("feature"))
-        if k not in keys:
-            keys.add(k); uniq.append(f)
-    features = uniq
-
     SEEN_F.write_text(json.dumps(sorted(seen), indent=0))
-    FEAT_F.write_text(json.dumps(features, indent=1, ensure_ascii=False))
-    render(features)
-    print(f"Done. {len(features)} feature entries across "
-          f"{len({f['category'] for f in features})} categories. Wrote index.html")
+    NEW_F.write_text(json.dumps(new_items, indent=1, ensure_ascii=False))
+    render(new_items)
+    print(f"Done. Added {added} genuinely-new item(s); {len(new_items)} total in 'New Since Baseline'.")
 
 if __name__ == "__main__":
     main()
