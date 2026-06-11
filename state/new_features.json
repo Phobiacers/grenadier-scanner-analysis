@@ -1,1 +1,13 @@
-[]
+[
+ {
+  "category": "demonstrated",
+  "feature": "Module settings backup/restore with comparison & change-log tool",
+  "quote": "This is some of the complete module settings back up, for restore, should you make changes. It also has a comparison tool, between different write to ECU sessions, to see changes in value and how those changes can be compared to address keeping the change, or making a value change to get to your intended desired results.",
+  "iso": "2026-06-10T14:03:13+0100",
+  "page": 18,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333396180",
+  "author": "Itsdchz",
+  "num": "351",
+  "id": "post-1333396180"
+ }
+]
