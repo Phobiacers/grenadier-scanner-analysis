@@ -42,5 +42,38 @@
   "author": "Itsdchz",
   "num": "439",
   "id": "post-1333396728"
+ },
+ {
+  "category": "rumored",
+  "feature": "AC recirculate — default on",
+  "quote": "If this was possible, I'd marry John Brindell: AC recirculate - default on",
+  "iso": "2026-06-16T15:47:57+0100",
+  "page": 24,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333396880",
+  "author": "joejet",
+  "num": "468",
+  "id": "post-1333396880"
+ },
+ {
+  "category": "rumored",
+  "feature": "Low-fuel warning calibration (trigger levels & alert responses)",
+  "quote": "Low fuel warning calibration (change trigger levels and alert responses)",
+  "iso": "2026-06-16T19:02:30+0100",
+  "page": 24,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333396910",
+  "author": "DefenderGuy",
+  "num": "473",
+  "id": "post-1333396910"
+ },
+ {
+  "category": "rumored",
+  "feature": "Altitude offset / recalibration tuning",
+  "quote": "The ability to offset the computed altitude and/or retune it; it's pretty consistently too low by about 100 feet",
+  "iso": "2026-06-16T19:02:30+0100",
+  "page": 24,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333396910",
+  "author": "DefenderGuy",
+  "num": "473",
+  "id": "post-1333396910"
  }
 ]
