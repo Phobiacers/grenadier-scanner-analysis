@@ -24,7 +24,7 @@ Env: ANTHROPIC_API_KEY (required), ANTHROPIC_MODEL (default claude-haiku-4-5),
 """
 
 import os, re, sys, json, time, html, datetime, pathlib
-import requests
+from browserclient import BrowserClient
 from bs4 import BeautifulSoup
 
 THREAD_URL = os.environ.get(
@@ -51,9 +51,6 @@ CAT_PILL   = {"demonstrated": "p-demo", "official": "p-off",
               "rumored": "p-rumor", "not_supported": "p-no"}
 
 # ----------------------------------------------------------------- scraping
-def fetch(url):
-    r = requests.get(url, headers=HEADERS, timeout=30); r.raise_for_status(); return r.text
-
 def page_url(n):
     return THREAD_URL if n == 1 else f"{THREAD_URL}page-{n}"
 
@@ -90,18 +87,31 @@ def parse_posts(page_html, page_no):
 
 def scrape_all():
     posts, page = [], 1
-    while page <= MAX_PAGES:
-        try:
-            ph = fetch(page_url(page))
-        except requests.HTTPError as e:
-            if e.response is not None and e.response.status_code == 404:
+    scraped_ids = set()
+    with BrowserClient() as client:
+        while page <= MAX_PAGES:
+            url = page_url(page)
+            resp = client.get(url)
+            if resp is None:
+                raise RuntimeError(f"Failed to fetch {url}")
+            if resp.status_code == 404:
                 break
-            raise
-        got = parse_posts(ph, page)
-        if not got:
-            break
-        posts.extend(got); print(f"  page {page}: {len(got)} posts"); page += 1
-        time.sleep(PAGE_DELAY)
+            got = parse_posts(resp.text, page)
+            if not got:
+                break
+            
+            # Check for duplicate posts in the current run (detects XenForo redirect to last page)
+            has_new = False
+            for p in got:
+                if p["id"] not in scraped_ids:
+                    scraped_ids.add(p["id"])
+                    has_new = True
+            
+            if not has_new:
+                print(f"  page {page} returned duplicate posts; ending scrape.")
+                break
+
+            posts.extend(got); print(f"  page {page}: {len(got)} posts"); page += 1
     seen, uniq = set(), []
     for p in posts:
         if p["id"] not in seen:
