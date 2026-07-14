@@ -141,5 +141,38 @@
   "author": "Mahoneyj",
   "num": "598",
   "id": "post-1333399235"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "ADAS complete disable via Expert Coding toggle — menu & telltale removal",
+  "quote": "What if I Toggle it to the Drop down of OFF in the AVD menu you see above? The RESULT???? WHERE did the ADAS menu go????? GONE !POOF! Instant ADAS EVERYTHING- BYE FELICIA!!!",
+  "iso": "2026-07-14T03:12:26+0100",
+  "page": 39,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333400628",
+  "author": "Itsdchz",
+  "num": "765",
+  "id": "post-1333400628"
+ },
+ {
+  "category": "official",
+  "feature": "Expert Coding & ADAS toggle — deferred to post-launch update (soon after public release)",
+  "quote": "The ADAS feature and Expert Coding WILL NOT be available on initial Public Release, as we still have a bit more testing to green light those features. But, Agile promises…. SOON after Public release, the updates will be flowing",
+  "iso": "2026-07-14T03:12:26+0100",
+  "page": 39,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333400628",
+  "author": "Itsdchz",
+  "num": "765",
+  "id": "post-1333400628"
+ },
+ {
+  "category": "rumored",
+  "feature": "Bi-directional actuation control — component testing (fuel pump, injectors, DPF regen, EGR, AdBlue, cooling fans, ABS bleed)",
+  "quote": "ability of the tool to send commands to test/trigger various components. e.g. fuel pump, turn an injector off with engine running or to fire with engine off, test fuel pressure reg/control valve, force a dpf regen, open/close the egr valve, test ad blue pump, test cooling fans, bleed abs.",
+  "iso": "2026-07-14T07:15:19+0100",
+  "page": 39,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333400659",
+  "author": "bakepl",
+  "num": "773",
+  "id": "post-1333400659"
  }
 ]
