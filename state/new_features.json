@@ -185,5 +185,27 @@
   "author": "Itsdchz",
   "num": "809",
   "id": "post-1333400893"
+ },
+ {
+  "category": "official",
+  "feature": "Mobile app with WiFi/BLE support",
+  "quote": "Other devices, through mobile and WIFI/BLE are in the near future roadmap.",
+  "iso": "2026-07-17T02:55:38+0100",
+  "page": 43,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401142",
+  "author": "Itsdchz",
+  "num": "847",
+  "id": "post-1333401142"
+ },
+ {
+  "category": "rumored",
+  "feature": "DPF soot-load monitoring & manual regen trigger",
+  "quote": "An advanced feature for AVD would be able to view this value and request an early partial regeneration if the owner knows it will be inconvenient or unsafe to let the DDE do it on schedule.",
+  "iso": "2026-07-17T05:47:11+0100",
+  "page": 43,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401147",
+  "author": "Clark Kent",
+  "num": "849",
+  "id": "post-1333401147"
  }
 ]
