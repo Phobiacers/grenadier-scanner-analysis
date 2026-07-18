@@ -207,5 +207,27 @@
   "author": "Clark Kent",
   "num": "849",
   "id": "post-1333401147"
+ },
+ {
+  "category": "official",
+  "feature": "DPF soot-load live data — diesel verification in progress",
+  "quote": "DPF fill level should be in the live data for the diesel. We are utilizing testers in UK/AUS to verify it is being displayed in our live data tables.",
+  "iso": "2026-07-17T14:35:26+0100",
+  "page": 43,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401212",
+  "author": "Itsdchz",
+  "num": "858",
+  "id": "post-1333401212"
+ },
+ {
+  "category": "not_supported",
+  "feature": "Server-side authorization issue blocking TPMS writes",
+  "quote": "TPMS Threshold write FAILED: Security access failed: Server key computation failed: Server error Unauthorized",
+  "iso": "2026-07-18T01:37:16+0100",
+  "page": 47,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401349",
+  "author": "SteveInNM",
+  "num": "933",
+  "id": "post-1333401349"
  }
 ]
