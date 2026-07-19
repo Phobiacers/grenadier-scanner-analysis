@@ -229,5 +229,38 @@
   "author": "SteveInNM",
   "num": "933",
   "id": "post-1333401349"
+ },
+ {
+  "category": "not_supported",
+  "feature": "Windows on ARM / ARM-based laptops incompatible",
+  "quote": "This dongle uses an old 32bit USB kernel driver that does not work with Windows ARM or the PRISM translator.",
+  "iso": "2026-07-19T04:37:18+0100",
+  "page": 51,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401504",
+  "author": "willcasp",
+  "num": "",
+  "id": "post-1333401504"
+ },
+ {
+  "category": "not_supported",
+  "feature": "Windows 11 ARM via Parallels on Mac Silicon incompatible",
+  "quote": "Running Windows 11 in Parallels on Mac Silicon, not going to work!",
+  "iso": "2026-07-19T04:37:18+0100",
+  "page": 51,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401504",
+  "author": "willcasp",
+  "num": "",
+  "id": "post-1333401504"
+ },
+ {
+  "category": "demonstrated",
+  "feature": "Service-interval custom reset error — 1500-mile threshold",
+  "quote": "I got an error when I tried to reset the service interval to \"custom\" with 1500 miles for the next alert.",
+  "iso": "2026-07-19T04:37:18+0100",
+  "page": 51,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401504",
+  "author": "willcasp",
+  "num": "",
+  "id": "post-1333401504"
  }
 ]
