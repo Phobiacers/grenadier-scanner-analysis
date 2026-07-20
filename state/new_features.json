@@ -262,5 +262,71 @@
   "author": "willcasp",
   "num": "",
   "id": "post-1333401504"
+ },
+ {
+  "category": "official",
+  "feature": "TPMS RCP (Reference Calibration Pressure) dynamic-value location & persistence — in development",
+  "quote": "We are also currently probing the system to find where the temporary RCP value is stored. Once we are able to do that successfully, we will then be able to adjust values based upon the RCP setting.",
+  "iso": "2026-07-19T15:07:50+0100",
+  "page": 51,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401528",
+  "author": "Itsdchz",
+  "num": "",
+  "id": "post-1333401528"
+ },
+ {
+  "category": "official",
+  "feature": "AVD Expert Coding — remove telltale lights & warning bongs",
+  "quote": "The other way can be done in the AVD expert coding, which will be opened up to the public and this group of early adopters very soon.",
+  "iso": "2026-07-19T15:18:56+0100",
+  "page": 51,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401530",
+  "author": "Itsdchz",
+  "num": "",
+  "id": "post-1333401530"
+ },
+ {
+  "category": "official",
+  "feature": "Custom programmable microcontroller with built-in CAN, LIN, BLE, Wi-Fi, USB",
+  "quote": "Agile is actively designing a custom, programmable microcontroller to give the end users the right balance of price, performance, and user capability across platforms such as cell phones, tablets and computers.",
+  "iso": "2026-07-19T21:32:32+0100",
+  "page": 52,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401561",
+  "author": "parb",
+  "num": "",
+  "id": "post-1333401561"
+ },
+ {
+  "category": "official",
+  "feature": "Asymmetric cipher crypto & end-to-end encryption for vehicle schema & command timing",
+  "quote": "I've implemented an asymmetric cipher crypto for transferring the vehicle schema, command timing sets and a few nice extra features you'll hear about next directly to the client via end-to-end encryption.",
+  "iso": "2026-07-19T21:32:32+0100",
+  "page": 52,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401561",
+  "author": "parb",
+  "num": "",
+  "id": "post-1333401561"
+ },
+ {
+  "category": "official",
+  "feature": "Hardware-based decryption, revocation controls, and data TTL (Time-To-Live) to prevent app cracking & malicious software",
+  "quote": "By shifting this decryption logic, revocation controls, and data TTL (Time-To-Live) straight into the secure hardware adapter, we prevent bad actors from cracking the mobile app to steal the platform's 'secret sauce.'",
+  "iso": "2026-07-19T21:32:32+0100",
+  "page": 52,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401561",
+  "author": "parb",
+  "num": "",
+  "id": "post-1333401561"
+ },
+ {
+  "category": "official",
+  "feature": "Cross-platform mobile & tablet app via protocol-agnostic UI offloading timing logic to hardware adapter",
+  "quote": "By offloading timing-sensitive logic and security keys to the adapter, the smartphone/tablet app becomes a clean, protocol-agnostic user interface.",
+  "iso": "2026-07-19T21:32:32+0100",
+  "page": 52,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333401561",
+  "author": "parb",
+  "num": "",
+  "id": "post-1333401561"
  }
 ]
