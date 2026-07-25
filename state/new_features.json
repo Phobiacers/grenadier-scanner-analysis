@@ -328,5 +328,49 @@
   "author": "parb",
   "num": "",
   "id": "post-1333401561"
+ },
+ {
+  "category": "official",
+  "feature": "SSL certificate for legitimate Windows driver signing",
+  "quote": "We are working on getting the certificate for SSL live in order for the driver to sign legitimately through the windows system... should be live either later today or tomorrow first thing.",
+  "iso": "2026-07-24T14:15:10+0100",
+  "page": 58,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333402211",
+  "author": "Itsdchz",
+  "num": "",
+  "id": "post-1333402211"
+ },
+ {
+  "category": "official",
+  "feature": "Expert Coding features release to public (initial release group)",
+  "quote": "We are looking at some of the expert coding features being released to the public, especially to the initial release group.",
+  "iso": "2026-07-24T14:15:10+0100",
+  "page": 58,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333402211",
+  "author": "Itsdchz",
+  "num": "",
+  "id": "post-1333402211"
+ },
+ {
+  "category": "official",
+  "feature": "AVD (ADAS Visual Disable) live on Agile site with instructional videos",
+  "quote": "The AVD is live on Agile site and very soon there will also be some videos associated with how to run through some of the features, install, and other tips and tricks, created through Agile.",
+  "iso": "2026-07-24T14:15:10+0100",
+  "page": 58,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333402211",
+  "author": "Itsdchz",
+  "num": "",
+  "id": "post-1333402211"
+ },
+ {
+  "category": "official",
+  "feature": "Mobile platform application development underway",
+  "quote": "We are also starting to work on the application through mobile platforms... The anticipation to have this fully integrated on desktop and mobile is the expectation through the evolution of the AVD tool.",
+  "iso": "2026-07-24T14:15:10+0100",
+  "page": 58,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333402211",
+  "author": "Itsdchz",
+  "num": "",
+  "id": "post-1333402211"
  }
 ]
