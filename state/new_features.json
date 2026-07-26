@@ -372,5 +372,27 @@
   "author": "Itsdchz",
   "num": "",
   "id": "post-1333402211"
+ },
+ {
+  "category": "not_supported",
+  "feature": "VPN connection compatibility",
+  "quote": "The software will not work on a VPN connection and appears to be literally incapable of recognizing a VPN internet connection even after the software has been registered using a non-VPN connection.",
+  "iso": "2026-07-25T15:12:35+0100",
+  "page": 59,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333402363",
+  "author": "DefenderGuy",
+  "num": "",
+  "id": "post-1333402363"
+ },
+ {
+  "category": "not_supported",
+  "feature": "Offline mode duration limit",
+  "quote": "The software appears to be programmed to be disabled, including those functions that don't require an internet connection, if you go for more than seven days without a valid — i.e., non-VPN — internet connection.",
+  "iso": "2026-07-25T15:12:35+0100",
+  "page": 59,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333402363",
+  "author": "DefenderGuy",
+  "num": "",
+  "id": "post-1333402363"
  }
 ]
