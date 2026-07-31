@@ -394,5 +394,60 @@
   "author": "DefenderGuy",
   "num": "",
   "id": "post-1333402363"
+ },
+ {
+  "category": "official",
+  "feature": "TPMS write — all 5 sensors required by Grenadier ECU",
+  "quote": "If you have used a TPMS scanner and it doesn't have a sensor, you won't be able to write until you have one in there. The grenny computer demands to see all 5 before writing functions.",
+  "iso": "2026-07-30T23:25:10+0100",
+  "page": 64,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333403033",
+  "author": "Agile Support",
+  "num": "",
+  "id": "post-1333403033"
+ },
+ {
+  "category": "official",
+  "feature": "TPMS sensor-position mapping — user-configurable display order",
+  "quote": "The software and the grenadier don't intrinsically know where the tires are located. You are telling them where they are.",
+  "iso": "2026-07-30T23:25:10+0100",
+  "page": 64,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333403033",
+  "author": "Agile Support",
+  "num": "",
+  "id": "post-1333403033"
+ },
+ {
+  "category": "official",
+  "feature": "TPMS copy/paste sensor values — planned future enhancement",
+  "quote": "We could implement that in the future, and I will mention it to our programmer. In the meantime, you will have to copy and paste the sensor values the way you like.",
+  "iso": "2026-07-30T23:25:10+0100",
+  "page": 64,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333403033",
+  "author": "Agile Support",
+  "num": "",
+  "id": "post-1333403033"
+ },
+ {
+  "category": "official",
+  "feature": "Windows driver approval — pending Microsoft certification",
+  "quote": "The driver is being blocked, and we thought turning off the security would fix it, but that hasn't, so we are waiting on Microsoft to approve our driver. They are slow with that; we thought it would be done by Monday.",
+  "iso": "2026-07-30T23:25:10+0100",
+  "page": 64,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333403033",
+  "author": "Agile Support",
+  "num": "",
+  "id": "post-1333403033"
+ },
+ {
+  "category": "not_supported",
+  "feature": "Windows 11 dark mode — TPMS sensor ID visibility",
+  "quote": "in windows 11 dark mode (default I think) the TPMS sensor ID is not visible in the info boxes? Its a white box with white text",
+  "iso": "2026-07-31T03:14:05+0100",
+  "page": 64,
+  "url": "https://www.theineosforum.com/threads/agile-servicing-software-service-reset-tpms-management-and-more%E2%80%A6.12421872/post-1333403054",
+  "author": "5teve",
+  "num": "",
+  "id": "post-1333403054"
  }
 ]
